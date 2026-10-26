@@ -2,6 +2,7 @@
   "name": "pnl-league-bot",
   "private": true,
   "description": "PNL League Telegram bot: early list, FAQ, questions, broadcasts. Vercel + Google Sheets, no dependencies.",
-  "engines": { "node": "20.x" },
-  "scripts": { "test": "node test/simulate.js" }
+  "scripts": {
+    "test": "node test/simulate.js"
+  }
 }
