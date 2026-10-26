@@ -5,9 +5,9 @@ const { telegram, sheet } = require("../lib/clients");
 module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(200).send("PNL League bot is running.");
   // Only Telegram knows this secret (set by /api/setup), so nobody else can fake updates.
-  if (req.headers["x-telegram-bot-api-secret-token"] !== process.env.WEBHOOK_SECRET) return res.status(401).send("no");
+  if (req.headers["x-telegram-bot-api-secret-token"] !== require("../lib/env")().WEBHOOK_SECRET) return res.status(401).send("no");
 
-  const env = process.env;
+  const env = require("../lib/env")();
   const bot = createBot({
     tg: telegram(env.BOT_TOKEN),
     db: sheet(env.SHEET_URL, env.SHEET_SECRET),

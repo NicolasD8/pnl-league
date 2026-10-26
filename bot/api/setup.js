@@ -3,7 +3,7 @@
 const { telegram } = require("../lib/clients");
 
 module.exports = async (req, res) => {
-  const env = process.env;
+  const env = require("../lib/env")();
   if (!env.WEBHOOK_SECRET || req.query.key !== env.WEBHOOK_SECRET) return res.status(401).send("Add ?key=<your WEBHOOK_SECRET> to the URL.");
   const missing = ["BOT_TOKEN", "BOT_USERNAME", "SHEET_URL", "SHEET_SECRET", "ADMIN_IDS", "OKX_CAMPAIGN_URL", "REG_OPENS"].filter((k) => !env[k]);
   const tg = telegram(env.BOT_TOKEN);
