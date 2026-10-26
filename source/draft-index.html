@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PNL League · Lebanon's first live trading championship</title>
+<meta name="description" content="12 seats at the Live Finals. 5,000 USDT prize pool. Join the early list and get your registration link the minute it opens." />
+<meta property="og:title" content="PNL League · 12 seats. One title." />
+<meta property="og:description" content="Lebanon's first live trading championship, presented by OKX. Join the early list." />
+<meta property="og:image" content="og.png" />
+<meta name="theme-color" content="#0B1410" />
+<link rel="icon" href="icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --green: #22f07a; --green-dim: #18b85d; --black: #0b1410; --black-2: #111c17; --bone: #f3f5f0;
+    --ash: #9fb0a6; --ash-2: #6f8077; --line: rgba(159,176,166,.18); --red: #ff5a5a;
+    --display: "Big Shoulders Display", Impact, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--black); color: var(--bone); font-family: var(--mono); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  .label { font-family: var(--display); font-weight: 700; text-transform: uppercase; letter-spacing: .16em; font-size: 14px; color: var(--ash); }
+  .h { font-family: var(--display); font-weight: 900; text-transform: uppercase; line-height: .9; letter-spacing: -.005em; }
+  .green { color: var(--green); }
+
+  /* top bar */
+  .bar { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .bar svg { height: 34px; width: auto; display: block; }
+  .bar .label { font-size: 12px; }
+
+  /* hero */
+  .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; padding: 40px 0 72px; align-items: start; }
+  .hero h1 { font-size: clamp(64px, 9vw, 128px); margin-top: 18px; }
+  .hero .sub { font-size: 16px; max-width: 520px; margin-top: 24px; color: var(--bone); }
+  .countdown { display: flex; gap: 10px; margin-top: 34px; }
+  .countdown div { border: 1px solid var(--line); padding: 12px 14px 10px; min-width: 76px; }
+  .countdown b { display: block; font-family: var(--display); font-weight: 900; font-size: 44px; line-height: .9; color: var(--green); font-variant-numeric: tabular-nums; }
+  .countdown span { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ash); }
+  .cd-note { margin-top: 12px; font-size: 13px; color: var(--ash); }
+
+  /* form card */
+  .card { background: var(--black-2); border: 1px solid var(--line); border-top: 4px solid var(--green); padding: 30px 28px 26px; position: relative; }
+  .card h2 { font-size: 40px; }
+  .card .lead { font-size: 13.5px; color: var(--ash); margin-top: 10px; }
+  .cap { margin-top: 18px; }
+  .cap .track { height: 6px; background: rgba(159,176,166,.15); }
+  .cap .fill { height: 100%; background: var(--green); width: 0; transition: width .8s ease; }
+  .cap p { font-size: 12.5px; color: var(--ash); margin-top: 6px; }
+  form { margin-top: 22px; display: grid; gap: 14px; }
+  .field label { display: block; font-family: var(--display); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; color: var(--ash); margin-bottom: 6px; }
+  .field input, .field select {
+    width: 100%; background: var(--black); color: var(--bone); border: 1px solid rgba(159,176,166,.3); border-radius: 0;
+    font: 500 15px var(--mono); padding: 13px 14px; appearance: none; -webkit-appearance: none;
+  }
+  .field select { background-image: linear-gradient(45deg, transparent 50%, var(--ash) 50%), linear-gradient(135deg, var(--ash) 50%, transparent 50%);
+    background-position: calc(100% - 20px) 55%, calc(100% - 14px) 55%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 40px; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 1px var(--green); }
+  .phone { display: grid; grid-template-columns: 84px 1fr; gap: 8px; }
+  .check { display: grid; grid-template-columns: 20px 1fr; gap: 10px; font-size: 12.5px; color: var(--ash); align-items: start; cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: var(--green); margin-top: 2px; }
+  .btn {
+    display: inline-flex; justify-content: center; align-items: center; gap: 10px; width: 100%;
+    background: var(--green); color: var(--black); border: 0; cursor: pointer; text-decoration: none;
+    font: 900 26px/1 var(--display); text-transform: uppercase; letter-spacing: .01em; padding: 16px 20px 13px;
+  }
+  .btn:hover { background: #4cf597; }
+  .btn:focus-visible { outline: 3px solid var(--bone); outline-offset: 3px; }
+  .btn[disabled] { opacity: .6; cursor: wait; }
+  .btn.ghost { background: transparent; color: var(--bone); border: 1px solid rgba(243,245,240,.4); font-size: 22px; }
+  .btn.ghost:hover { border-color: var(--green); color: var(--green); }
+  .err { color: var(--red); font-size: 13px; min-height: 0; }
+  .fine { font-size: 11.5px; color: var(--ash-2); line-height: 1.5; }
+
+  /* success state */
+  .done { display: none; }
+  .card.is-done form, .card.is-done .formhead { display: none; }
+  .card.is-done .done { display: block; }
+  .done .tick { font-family: var(--display); font-weight: 900; font-size: 15px; letter-spacing: .14em; color: var(--black); background: var(--green); display: inline-block; padding: 6px 10px 4px; }
+  .done h2 { margin-top: 16px; }
+  .done ol { list-style: none; margin: 20px 0 22px; counter-reset: s; }
+  .done li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; padding: 12px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+  .done li::before { content: counter(s, decimal-leading-zero); font: 900 22px/1 var(--display); color: var(--green); }
+  .done .btn + .btn { margin-top: 10px; }
+
+  /* prize strip */
+  .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .strip .wrap { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; }
+  .stat { padding: 30px 24px 26px; border-left: 1px solid var(--line); }
+  .stat:first-child { border-left: 0; padding-left: 0; }
+  .stat b { display: block; font: 900 64px/.9 var(--display); color: var(--green); }
+  .stat.big b { font-size: 92px; }
+  .stat span { display: block; margin-top: 10px; font: 700 14px var(--display); letter-spacing: .12em; text-transform: uppercase; }
+  .stat small { display: block; font-size: 12px; color: var(--ash); margin-top: 4px; }
+
+  /* sections */
+  section.s { padding: 96px 0; }
+  .s-head { display: grid; grid-template-columns: .9fr 1.1fr; gap: 56px; align-items: start; }
+  .s-head h2 { font-size: clamp(48px, 6vw, 80px); }
+  .steps { list-style: none; }
+  .steps li { display: grid; grid-template-columns: 64px 1fr; padding: 20px 0; border-bottom: 1px solid var(--line); }
+  .steps li:first-child { padding-top: 0; }
+  .steps .n { font: 900 44px/.9 var(--display); color: var(--green); }
+  .steps h3 { font: 900 28px/1 var(--display); text-transform: uppercase; }
+  .steps p { color: var(--ash); font-size: 14px; margin-top: 6px; }
+  .steps .when { display: inline-block; margin-top: 8px; font: 700 12px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--black); background: var(--ash); padding: 3px 8px 2px; }
+  .steps .when.now { background: var(--green); }
+
+  .finals { background: var(--bone); color: var(--black); }
+  .finals .label { color: #5b6b62; }
+  .finals .s-head p { font-size: 16px; }
+  .crew { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 56px; border-top: 2px solid var(--black); }
+  .crew div { padding: 22px 22px 0 0; }
+  .crew div + div { padding-left: 22px; border-left: 1px solid rgba(11,20,16,.15); }
+  .crew b { display: block; font: 900 36px/1 var(--display); text-transform: uppercase; }
+  .crew span { display: block; margin-top: 8px; font-size: 13.5px; color: #4a5a51; }
+
+  .faq details { border-bottom: 1px solid var(--line); }
+  .faq summary { list-style: none; cursor: pointer; padding: 20px 40px 20px 0; position: relative; font: 900 26px/1.05 var(--display); text-transform: uppercase; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; position: absolute; right: 4px; top: 16px; font-size: 32px; color: var(--green); transition: transform .2s; }
+  .faq details[open] summary::after { transform: rotate(45deg); }
+  .faq summary:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  .faq p { color: var(--ash); padding: 0 0 22px; max-width: 640px; font-size: 14.5px; }
+
+  .closer { text-align: center; padding: 110px 0; border-top: 1px solid var(--line); }
+  .closer h2 { font-size: clamp(64px, 10vw, 150px); }
+  .closer .btn { width: auto; margin-top: 34px; padding: 18px 34px 15px; }
+
+  footer { border-top: 1px solid var(--line); padding: 30px 0 110px; font-size: 12px; color: var(--ash-2); }
+  footer .wrap { display: flex; justify-content: space-between; gap: 30px; flex-wrap: wrap; }
+  footer .disc { font: 700 14px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--ash); }
+
+  /* mobile sticky CTA */
+  .sticky { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(11,20,16,.94);
+    border-top: 1px solid var(--line); display: none; z-index: 10; transform: translateY(110%); transition: transform .25s; }
+  .sticky.show { transform: none; }
+  .sticky .btn { font-size: 22px; padding: 14px; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; gap: 34px; padding: 18px 0 56px; }
+    .hero h1 { font-size: 72px; }
+    .countdown div { min-width: 0; flex: 1; padding: 10px 8px 8px; }
+    .countdown b { font-size: 36px; }
+    .strip .wrap { grid-template-columns: 1fr 1fr; padding: 0; }
+    .stat, .stat:first-child { padding: 22px 16px; border-left: 0; border-bottom: 1px solid var(--line); }
+    .stat:nth-child(odd) { border-right: 1px solid var(--line); }
+    .stat.big { grid-column: 1 / -1; border-right: 0; }
+    .stat b { font-size: 48px; } .stat.big b { font-size: 72px; }
+    section.s { padding: 64px 0; }
+    .s-head { grid-template-columns: 1fr; gap: 28px; }
+    .crew { grid-template-columns: 1fr; }
+    .crew div, .crew div + div { padding: 18px 0; border-left: 0; border-bottom: 1px solid rgba(11,20,16,.15); }
+    .sticky { display: block; }
+    .bar .presented { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .cap .fill, .sticky { transition: none; } }
+</style>
+<!-- Meta Pixel: paste your pixel snippet here, then the page fires "Lead" on every signup (see CONFIG below). -->
+</head>
+<body>
+
+<header class="wrap bar">
+  <a href="#" aria-label="PNL League by CE"><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PNL League by CE" viewBox="0 0 420 100">
+<path transform="translate(20,66.1)" d="M2.3200000000000003 0.0V-46.400000000000006H13.514000000000001Q20.01 -46.400000000000006 22.895500000000002 -43.77550000000001Q25.781000000000002 -41.151 25.984 -35.09Q26.071 -32.654 26.071 -30.566000000000003Q26.071 -28.478 25.984 -26.042Q25.781000000000002 -20.01 22.895500000000002 -17.371000000000002Q20.01 -14.732000000000001 13.514000000000001 -14.732000000000001H11.020000000000001V0.0ZM11.020000000000001 -22.388H13.514000000000001Q15.341000000000001 -22.388 16.269 -23.229Q17.197 -24.07 17.284000000000002 -25.578000000000003Q17.371000000000002 -26.999000000000002 17.400000000000002 -28.782500000000002Q17.429000000000002 -30.566000000000003 17.400000000000002 -32.349500000000006Q17.371000000000002 -34.133 17.284000000000002 -35.554Q17.197 -37.091 16.269 -37.917500000000004Q15.341000000000001 -38.744 13.514000000000001 -38.744H11.020000000000001ZM28.739 0.0V-46.400000000000006H41.325L44.805 -31.610000000000003L47.995000000000005 -7.656000000000001H49.503L47.879000000000005 -26.506L47.183 -46.400000000000006H55.593V0.0H42.369L38.889 -15.196000000000002L36.511 -38.802H34.887L36.395 -17.806L37.149 0.0ZM59.36300000000001 0.0V-46.400000000000006H68.063V-7.656000000000001H79.489V0.0Z" fill="#F3F5F0"/><rect x="79.36" y="19.7" width="8.7" height="38.74" fill="#22F07A"/><rect x="82.26" y="11" width="2.9" height="8.7" fill="#22F07A"/><path transform="translate(113.12,66.1)" d="M2.3200000000000003 0.0V-46.400000000000006H11.020000000000001V-7.656000000000001H22.446V0.0ZM24.766000000000002 0.0V-46.400000000000006H44.834V-38.744H33.466V-27.434H44.254000000000005V-19.778000000000002H33.466V-7.656000000000001H44.834V0.0ZM45.82 0.0 52.258 -46.400000000000006H65.946L72.384 0.0H63.452L62.46600000000001 -9.686H55.738L54.752 0.0ZM56.550000000000004 -17.342000000000002H61.654L60.61 -27.608L59.914 -38.744H58.290000000000006L57.594 -27.608ZM85.95600000000002 0.5800000000000001Q81.57700000000001 0.5800000000000001 78.93800000000002 -0.5945Q76.299 -1.7690000000000001 75.08100000000002 -4.3355Q73.86300000000001 -6.902 73.718 -11.078000000000001Q73.63100000000001 -13.514000000000001 73.5875 -16.631500000000003Q73.54400000000001 -19.749000000000002 73.54400000000001 -23.055Q73.54400000000001 -26.361 73.5875 -29.435000000000002Q73.63100000000001 -32.509 73.718 -34.858000000000004Q73.89200000000001 -39.266000000000005 75.15350000000001 -41.934000000000005Q76.415 -44.602000000000004 79.0395 -45.791000000000004Q81.66400000000002 -46.980000000000004 85.95600000000002 -46.980000000000004Q92.046 -46.980000000000004 94.84450000000001 -44.2975Q97.64300000000001 -41.615 98.02000000000001 -35.38Q98.10700000000001 -34.046 98.10700000000001 -32.2045Q98.10700000000001 -30.363000000000003 98.02000000000001 -29.0H89.32000000000001Q89.40700000000001 -30.624000000000002 89.40700000000001 -33.0165Q89.40700000000001 -35.409 89.32000000000001 -37.004000000000005Q89.233 -38.396 88.363 -39.150000000000006Q87.49300000000001 -39.904 85.95600000000002 -39.904Q84.27400000000002 -39.904 83.38950000000001 -39.150000000000006Q82.50500000000001 -38.396 82.418 -37.004000000000005Q82.24400000000001 -33.959 82.15700000000001 -30.435500000000005Q82.07000000000001 -26.912000000000003 82.07000000000001 -23.229Q82.07000000000001 -19.546 82.15700000000001 -16.0225Q82.24400000000001 -12.499 82.418 -9.454Q82.50500000000001 -8.033000000000001 83.38950000000001 -7.264500000000001Q84.27400000000002 -6.496 85.95600000000002 -6.496Q87.60900000000001 -6.496 88.60950000000001 -7.264500000000001Q89.61000000000001 -8.033000000000001 89.72600000000001 -9.454Q89.784 -10.121 89.79850000000002 -11.2085Q89.81300000000002 -12.296000000000001 89.79850000000002 -13.383500000000002Q89.784 -14.471 89.72600000000001 -15.138H86.53600000000002V-22.678H98.19400000000002Q98.33900000000001 -20.039 98.31 -16.892500000000002Q98.281 -13.746 98.13600000000001 -11.078000000000001Q97.846 -4.814 95.0185 -2.117Q92.191 0.5800000000000001 85.95600000000002 0.5800000000000001ZM113.39000000000001 0.5800000000000001Q106.86500000000001 0.5800000000000001 104.05200000000002 -2.117Q101.23900000000002 -4.814 101.15200000000002 -11.078000000000001Q101.03600000000002 -19.836000000000002 101.03600000000002 -28.753500000000003Q101.03600000000002 -37.671 101.15200000000002 -46.400000000000006H109.85200000000002Q109.73600000000002 -40.571000000000005 109.72150000000002 -34.249Q109.70700000000002 -27.927000000000003 109.75050000000002 -21.605000000000004Q109.79400000000001 -15.283000000000001 109.85200000000002 -9.454Q109.85200000000002 -8.033000000000001 110.78000000000002 -7.264500000000001Q111.70800000000001 -6.496 113.39000000000001 -6.496Q115.10100000000001 -6.496 115.98550000000002 -7.264500000000001Q116.87000000000002 -8.033000000000001 116.87000000000002 -9.454Q116.92800000000001 -15.283000000000001 116.97150000000002 -21.605000000000004Q117.01500000000001 -27.927000000000003 117.00050000000002 -34.249Q116.98600000000002 -40.571000000000005 116.87000000000002 -46.400000000000006H125.57000000000002Q125.71500000000002 -37.671 125.71500000000002 -28.753500000000003Q125.71500000000002 -19.836000000000002 125.57000000000002 -11.078000000000001Q125.48300000000002 -4.814 122.68450000000001 -2.117Q119.88600000000001 0.5800000000000001 113.39000000000001 0.5800000000000001ZM128.93400000000003 0.0V-46.400000000000006H149.002V-38.744H137.63400000000001V-27.434H148.42200000000003V-19.778000000000002H137.63400000000001V-7.656000000000001H149.002V0.0Z" fill="#F3F5F0"/><path transform="translate(230.43,86.83)" d="M0.517269375 0.0V-8.908800000000001H2.20870525Q3.211717375 -8.908800000000001 3.6726886875 -8.489894093750001Q4.13366 -8.070988187500001 4.1384486250000005 -7.103609812500001Q4.14323725 -6.7465835625000015 4.14323725 -6.465339750000002Q4.14323725 -6.184095937500001 4.132101250000001 -5.917218000000001Q4.1027025 -5.382135375000001 3.9071555000000004 -5.070885625000001Q3.7116085000000005 -4.759635875000001 3.2974631250000006 -4.616539V-4.380401062500001Q3.7259181875 -4.2396985 3.9258360312500002 -3.924077906250001Q4.125753875 -3.608457312500001 4.14323725 -3.0606799375000002Q4.154373250000001 -2.7236999375 4.154373250000001 -2.43610875Q4.154373250000001 -2.1485175625 4.14323725 -1.8051901875000003Q4.1050968125 -0.8433798125 3.65960425 -0.42168990625Q3.2141116875000004 0.0 2.2110995625000003 0.0ZM1.7207784375000004 -1.0677075000000003H2.2110995625000003Q2.5714608125000002 -1.0677075000000003 2.7532001875 -1.2554326562500002Q2.9349395625000003 -1.4431578125000002 2.9397281875 -1.8202792500000002Q2.946911125 -2.1334285 2.946911125 -2.4146723125000005Q2.946911125 -2.6959161250000006 2.9397281875 -3.0066710625000006Q2.9349395625000003 -3.5315656250000007 2.7591297812500004 -3.7530603750000004Q2.5833200000000005 -3.9745551250000006 2.1895507500000004 -3.9745551250000006H1.7207784375000004ZM1.7207784375000004 -5.042262625H2.203916625Q2.5666721875 -5.042262625 2.7484115625000003 -5.271301906250001Q2.9301509375000006 -5.500341187500001 2.9349395625000003 -5.947396125000001Q2.9445168125000007 -6.266892750000001 2.9445168125000007 -6.5584650937500015Q2.9445168125000007 -6.850037437500001 2.9349395625000003 -7.163966062500001Q2.9301509375000006 -7.504562000000001 2.7484115625000003 -7.672827250000001Q2.5666721875 -7.841092500000001 2.20870525 -7.841092500000001H1.7207784375000004ZM7.715127375000002 0.0V-2.2259783750000004V-2.2371143750000004L6.274581375000001 -8.908800000000001H7.5043155000000015L7.959220375000001 -6.571236875L8.193301125000001 -3.9877972500000007H8.447645625000002L8.67693775 -6.571236875L9.131842625 -8.908800000000001H10.366365375L8.921030750000002 -2.2323257500000007V-2.2211897500000006V0.0Z" fill="#9FB0A6"/><g transform="translate(247.26,73.1) scale(0.01) translate(-168,-73)"><path d="M800.4 1525.4C800.7 1524.5 802.2 1519.2 803.7 1513.6C806.0 1505.1 806.4 1501.5 806.4 1490.5C806.4 1478.9 806.1 1476.7 803.7 1470.1C798.0 1454.3 787.0 1442.0 772.6 1435.0C763.4 1430.5 756.0 1428.7 739.5 1427.0C632.7 1415.9 538.6 1382.7 451.5 1325.5C360.8 1265.9 282.7 1178.0 234.7 1081.4C179.6 970.8 158.3 850.4 172.1 727.5C183.3 626.5 217.5 533.6 275.3 447.0C309.9 395.1 361.5 340.0 412.0 300.9C418.7 295.7 424.5 291.4 425.0 291.2C425.4 291.0 437.0 297.5 450.7 305.6C478.0 321.8 496.9 332.9 516.2 344.2L529.0 351.7L520.2 357.3C466.0 391.9 419.0 435.0 382.6 483.5C368.0 502.9 357.4 518.8 347.1 536.5C281.6 649.9 261.4 773.5 287.0 904.2C293.5 937.2 306.0 976.8 320.1 1009.2C323.8 1017.8 336.6 1043.7 340.5 1050.6C367.1 1097.2 392.1 1130.2 430.0 1168.1C448.8 1186.9 454.6 1192.2 471.5 1205.9C542.5 1263.5 629.4 1301.9 719.5 1315.5C737.9 1318.3 751.0 1318.6 759.5 1316.5C781.4 1310.9 798.9 1293.5 804.5 1271.9C807.0 1262.5 806.2 1246.4 802.6 1234.1C801.1 1229.0 800.0 1224.6 800.2 1224.5C800.4 1224.3 803.0 1225.7 806.1 1227.5C809.2 1229.3 820.7 1236.0 831.6 1242.3C855.0 1255.7 866.9 1262.6 884.0 1272.5C890.9 1276.5 901.0 1282.3 906.5 1285.5C912.0 1288.7 925.5 1296.5 936.5 1302.8C967.2 1320.5 992.3 1335.0 1005.5 1342.7C1038.8 1362.0 1051.9 1369.5 1056.0 1371.8C1058.5 1373.1 1060.9 1374.6 1061.3 1375.0C1062.2 1375.8 1058.1 1378.5 1040.8 1388.4C1025.8 1397.0 985.0 1420.6 958.5 1436.0C954.1 1438.6 939.7 1446.9 926.5 1454.5C913.3 1462.1 898.7 1470.6 894.0 1473.4C889.3 1476.1 879.9 1481.6 873.0 1485.5C841.7 1503.5 808.0 1523.1 804.9 1524.9C800.8 1527.4 799.6 1527.5 800.4 1525.4ZM1157.5 1299.3C1148.7 1294.1 1125.8 1280.5 1106.5 1269.3C1087.2 1258.0 1071.4 1248.7 1071.2 1248.6C1071.1 1248.4 1077.0 1244.4 1084.4 1239.6C1101.1 1228.8 1121.6 1213.7 1138.0 1200.0C1151.4 1188.8 1185.0 1156.1 1194.0 1145.4C1197.0 1141.8 1200.2 1138.1 1201.0 1137.2C1204.0 1133.9 1217.8 1116.3 1223.2 1109.0C1238.6 1088.0 1256.2 1058.9 1269.5 1032.2C1315.8 939.3 1332.6 840.2 1319.4 736.5C1306.7 635.4 1269.5 548.7 1205.5 470.5C1123.1 369.9 1004.7 302.6 877.7 284.0C861.2 281.6 848.6 281.4 840.5 283.5C818.6 289.1 801.1 306.5 795.5 328.1C793.0 337.6 793.8 353.7 797.4 365.8C798.9 371.0 800.0 375.3 799.8 375.4C799.7 375.6 795.2 373.3 790.0 370.3C753.5 349.2 739.9 341.4 736.0 339.0C733.5 337.5 719.1 329.2 704.0 320.5C688.9 311.8 670.5 301.1 663.2 296.8C655.9 292.5 649.7 289.0 649.5 289.0C649.3 289.0 645.6 286.9 641.3 284.4C637.0 281.8 624.7 274.7 614.0 268.5C603.3 262.3 590.7 255.0 586.0 252.3C581.3 249.6 569.9 242.9 560.5 237.5C551.1 232.1 542.2 226.9 540.7 226.0L537.9 224.2L541.2 222.3C546.8 218.9 581.1 199.0 611.0 181.7C626.7 172.7 646.5 161.2 655.0 156.3C674.1 145.2 701.3 129.4 706.0 126.8C707.9 125.7 714.7 121.7 721.0 118.1C771.8 88.4 799.1 72.8 799.5 73.1C799.6 73.3 798.4 78.5 796.8 84.5C794.1 94.0 793.7 97.3 793.6 108.5C793.5 119.8 793.8 122.5 795.9 128.9C800.5 143.0 812.1 157.1 824.6 163.7C834.5 169.0 841.7 170.8 861.1 173.0C947.2 182.6 1014.2 202.0 1085.5 238.0C1145.0 268.1 1198.5 306.7 1245.5 353.5C1335.2 442.9 1394.6 553.0 1419.4 675.7C1443.0 792.2 1433.1 915.2 1391.3 1024.4C1369.8 1080.4 1342.7 1130.0 1307.6 1177.0C1298.0 1189.9 1281.2 1210.5 1272.6 1220.0C1254.2 1240.1 1241.1 1253.3 1224.5 1268.4C1207.3 1284.2 1176.5 1309.0 1174.4 1309.0C1173.9 1309.0 1166.3 1304.6 1157.5 1299.3ZM574.0 1029.5L574.0 1003.0L571.2 1002.4C497.8 986.0 439.3 931.0 419.1 859.5C399.4 789.5 418.1 715.1 468.4 663.1C494.3 636.4 527.9 616.7 562.5 608.0L573.5 605.2L574.0 575.8L574.5 546.5L585.2 546.2L596.0 545.9L596.0 574.1L596.0 602.3L600.6 601.6C603.2 601.3 609.7 601.0 615.1 601.0L625.0 601.0L625.2 573.8L625.5 546.5L636.0 546.5L646.5 546.5L647.0 574.9L647.5 603.3L650.0 604.0C651.4 604.4 656.1 605.5 660.5 606.5C695.3 614.1 728.4 632.3 756.1 658.8C761.0 663.4 765.2 668.2 765.6 669.3C766.1 670.9 765.3 672.3 761.9 675.4C759.5 677.6 747.4 689.1 735.0 701.0C722.6 712.9 710.2 724.7 707.5 727.2L702.5 731.8L694.9 724.5C673.0 703.5 649.1 692.8 620.0 691.3C585.0 689.6 549.7 705.5 527.5 733.3C519.1 743.8 509.9 762.1 506.3 775.5C504.0 784.4 503.7 787.4 503.6 802.5C503.5 820.2 504.0 823.6 508.7 838.5C520.0 874.1 551.0 903.0 587.8 912.4C626.4 922.1 669.9 909.5 696.7 880.7C700.1 877.0 703.5 874.0 704.1 874.0C705.1 874.0 714.1 882.0 732.5 899.2C735.2 901.7 738.5 904.7 739.7 905.8C740.9 906.8 746.5 911.9 752.2 917.2C757.9 922.4 764.2 928.2 766.2 929.9C768.3 931.7 770.0 933.5 770.0 933.9C770.0 935.4 755.8 949.9 746.4 958.0C720.2 980.5 689.5 995.6 655.0 1002.9L647.5 1004.5L647.2 1030.3L647.0 1056.1L636.2 1055.8L625.5 1055.5L625.2 1031.3L625.0 1007.2L611.2 1006.8C603.7 1006.6 597.2 1006.6 596.8 1006.8C596.3 1007.0 596.0 1018.1 596.0 1031.6L596.0 1056.0L585.0 1056.0L574.0 1056.0L574.0 1029.5ZM968.7 1001.9C945.6 999.7 921.2 992.7 899.5 982.1C824.7 945.8 780.0 868.5 785.9 785.8C790.7 718.1 827.5 658.8 886.1 624.4C907.1 612.2 927.9 604.5 954.5 599.3C961.5 598.0 968.9 597.6 988.0 597.6C1009.7 597.5 1013.8 597.8 1024.0 599.8C1064.0 607.8 1095.6 623.3 1123.9 648.9C1157.7 679.3 1179.0 717.6 1188.1 764.2C1190.7 777.6 1191.6 809.4 1189.8 823.0L1188.5 832.5L1035.2 832.8L882.0 833.0L882.0 835.1C882.0 838.1 889.2 853.0 894.5 861.1C906.8 879.5 928.1 896.5 948.0 903.9C963.0 909.4 969.6 910.4 988.5 910.4C1004.9 910.3 1007.4 910.1 1016.5 907.6C1036.4 902.2 1053.6 892.2 1068.4 877.3L1077.0 868.7L1084.8 876.1C1093.4 884.4 1123.6 913.0 1134.8 923.5C1138.7 927.2 1142.0 930.8 1142.0 931.4C1142.0 932.0 1138.7 935.9 1134.8 940.1C1091.7 985.1 1030.5 1007.8 968.7 1001.9ZM1094.0 760.0C1094.0 756.2 1082.9 736.4 1075.9 727.7C1060.4 708.5 1040.1 695.5 1015.3 688.9C1005.3 686.2 981.4 685.2 970.2 687.0C955.0 689.4 939.4 695.6 925.5 704.8C915.0 711.7 898.6 728.8 892.4 739.3C885.7 750.6 881.3 760.9 882.7 761.8C883.3 762.2 931.1 762.4 988.9 762.2C1092.4 762.0 1094.0 762.0 1094.0 760.0Z" fill="#F3F5F0"/></g>
+</svg></a>
+  <div class="label presented">Presented by OKX</div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <div class="label">Lebanon's first live trading championship</div>
+      <h1 class="h">12 seats.<br /><span class="green">One title.</span></h1>
+      <p class="sub">PNL League puts Lebanon's traders on a live leaderboard. The top 12 trade live at VCore Tabarja, in front of a crowd and casters, for a 5,000 USDT prize pool.</p>
+      <div class="countdown" id="countdown" aria-live="polite">
+        <div><b data-u="d">--</b><span>Days</span></div>
+        <div><b data-u="h">--</b><span>Hours</span></div>
+        <div><b data-u="m">--</b><span>Min</span></div>
+        <div><b data-u="s">--</b><span>Sec</span></div>
+      </div>
+      <p class="cd-note" id="cd-note">Until official registration opens on OKX. The early list closes the same moment.</p>
+    </div>
+
+    <div class="card" id="join">
+      <div class="formhead">
+        <div class="label">Early list · Phase 1</div>
+        <h2 class="h" style="margin-top: 10px">Claim your <span class="green">early spot.</span></h2>
+        <p class="lead">Get your registration link the minute it opens, and help getting your OKX account ready before day one.</p>
+        <div class="cap" id="cap" hidden>
+          <div class="track"><div class="fill" id="cap-fill"></div></div>
+          <p id="cap-text"></p>
+        </div>
+      </div>
+
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="name">Full name</label>
+          <input id="name" name="name" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label for="phone">WhatsApp number</label>
+          <div class="phone">
+            <input id="cc" name="cc" value="+961" inputmode="tel" aria-label="Country code" />
+            <input id="phone" name="phone" inputmode="tel" autocomplete="tel-national" placeholder="71 234 567" required />
+          </div>
+        </div>
+        <div class="field">
+          <label for="okx">Your OKX account</label>
+          <select id="okx" name="okx" required>
+            <option value="" selected disabled>Choose one</option>
+            <option value="verified">I have one, KYC verified</option>
+            <option value="unverified">I have one, not verified yet</option>
+            <option value="none">I don't have one yet</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="exp">How do you trade?</label>
+          <select id="exp" name="exp">
+            <option value="" selected>Prefer not to say</option>
+            <option value="futures">Mostly futures</option>
+            <option value="spot">Mostly spot</option>
+            <option value="both">Both</option>
+            <option value="new">Just getting started</option>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" id="eligible" name="eligible" required /><span>I'm 18 or older and based in Lebanon.</span></label>
+        <label class="check"><input type="checkbox" id="consent" name="consent" required /><span>PNL League can contact me on WhatsApp about the competition. No spam, and I can opt out any time.</span></label>
+        <p class="err" id="err" role="alert"></p>
+        <button class="btn" type="submit" id="submit">Claim my spot</button>
+        <p class="fine">This is the PNL League early list, not the official entry. Official registration happens on OKX when it opens.</p>
+      </form>
+
+      <div class="done" id="done" tabindex="-1">
+        <span class="tick">You're on the list</span>
+        <h2 class="h"><span id="done-name">You're</span> in.</h2>
+        <ol>
+          <li><span>We'll WhatsApp you the official OKX registration link the moment it opens.</span></li>
+          <li><span id="kyc-step">Get your OKX account KYC verified now. It can take a while, and you need it to enter.</span></li>
+          <li><span>Bring your rivals. Send them your link below.</span></li>
+        </ol>
+        <a class="btn" id="okx-btn" href="#" target="_blank" rel="noopener">Open my OKX account</a>
+        <a class="btn ghost" id="share-btn" href="#" target="_blank" rel="noopener">Challenge a friend on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="wrap">
+      <div class="stat big"><b>5,000</b><span>USDT prize pool</span><small>Live Finals, VCore Tabarja</small></div>
+      <div class="stat"><b>1,000</b><span>USDT rewards</span><small>Online League (trading bonus)</small></div>
+      <div class="stat"><b>12</b><span>Finalists</span><small>From the whole of Lebanon</small></div>
+      <div class="stat"><b>6H</b><span>Live trading</span><small>Casters, crowd, livestream</small></div>
+    </div>
+  </div>
+
+  <section class="s wrap" id="how">
+    <div class="s-head">
+      <div>
+        <div class="label">How it works</div>
+        <h2 class="h" style="margin-top: 14px">Sign up. Trade.<br />Climb. <span class="green">Finals.</span></h2>
+      </div>
+      <ol class="steps">
+        <li><span class="n">01</span><div><h3>Join the early list</h3><p>Right here. Takes 20 seconds.</p><span class="when now">Now</span></div></li>
+        <li><span class="n">02</span><div><h3>Register on OKX</h3><p>We send you the official link the moment registration opens. You'll need a KYC-verified OKX account, a 50 USDT minimum deposit and 5,000 USDT minimum trading volume to rank.</p><span class="when" id="when-reg">Registration opens soon</span></div></li>
+        <li><span class="n">03</span><div><h3>Climb two leaderboards</h3><p>PnL and Trading Volume, updated live every 5 minutes. Rewards from both are added up, and the 12 highest totals make the Finals.</p></div></li>
+        <li><span class="n">04</span><div><h3>Trade live at VCore</h3><p>Six hours of live trading at VCore Tabarja, with casters, a crowd and a livestream on TikTok and Instagram. One title.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="s finals">
+    <div class="wrap">
+      <div class="s-head">
+        <div>
+          <div class="label">The Live Finals</div>
+          <h2 class="h" style="margin-top: 14px">No screenshots. No stories. Just the leaderboard.</h2>
+        </div>
+        <div>
+          <p>Trading has always been a solo sport. Not anymore. The 12 finalists sit side by side at VCore Tabarja, Lebanon's biggest esports venue, for six hours of live trading. Every position on the big screen, every move called live.</p>
+          <p style="margin-top: 14px; color: #4a5a51">Date announced with the registration opening.</p>
+        </div>
+      </div>
+      <div class="crew">
+        <div><b>Rami</b><span>Casts the Live Finals and streams it on TikTok and Instagram.</span></div>
+        <div><b>Rich</b><span>Coaches all 12 finalists on the night. Same coach, one winner.</span></div>
+        <div><b>You?</b><span>Twelve seats. Make the top 12 on the leaderboard and one of them is yours.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="s wrap faq">
+    <div class="s-head">
+      <div>
+        <div class="label">Questions</div>
+        <h2 class="h" style="margin-top: 14px">Before you <span class="green">ask.</span></h2>
+      </div>
+      <div>
+        <details><summary>Is this the official registration?</summary><p>No. Official registration happens on OKX's campaign page and opens soon. The early list means you get that link the moment it opens, and we help you get your account ready before then so you can start on day one.</p></details>
+        <details><summary>Who can enter?</summary><p>Anyone 18 or older, based in Lebanon, with a KYC-verified OKX account. Main accounts only, no sub-accounts.</p></details>
+        <details><summary>I already have an OKX account.</summary><p>Good. Pick "I have one" in the form. Some existing accounts need to be linked to the competition before they're eligible. We'll check yours with you before registration opens.</p></details>
+        <details><summary>What can I win?</summary><p>The 12 finalists compete for a 5,000 USDT prize pool at the Live Finals. During the Online League, 1,000 USDT in trading-bonus rewards is shared across the two leaderboards.</p></details>
+        <details><summary>How are the 12 finalists chosen?</summary><p>There are two live leaderboards, PnL and Trading Volume. Your rewards from both are added up, and the 12 highest totals qualify. You need a 50 USDT minimum deposit and 5,000 USDT minimum trading volume to rank. Wash trading and multiple accounts get you disqualified.</p></details>
+        <details><summary>What happens to my number?</summary><p>We use it only to send you competition updates on WhatsApp. We don't sell or share it, and you can ask us to delete it any time.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="closer wrap">
+    <div class="label">Mind over market</div>
+    <h2 class="h" style="margin-top: 16px">Think you can<br /><span class="green">trade?</span></h2>
+    <a class="btn" href="#join" id="closer-btn">Claim my spot</a>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><div class="disc">18+. KYC required. Trading involves risk.</div><p style="margin-top: 8px; max-width: 560px">PNL League is a trading competition. Nothing on this page is investment advice or a recommendation to trade. Digital assets are volatile and you can lose some or all of what you put in. Competition terms are set by OKX on the official campaign page.</p></div>
+    <div style="text-align: right">PNL League by CE · Presented by OKX<br />@pnlleague · #PNLLeague #MindOverMarket</div>
+  </div>
+</footer>
+
+<div class="sticky" id="sticky"><a class="btn" href="#join">Claim my spot</a></div>
+
+<script>
+/* ======================= EDIT ME ======================= */
+const CONFIG = {
+  // Google Apps Script web-app URL (see apps-script.gs). Empty = demo mode: the form shows success but saves nothing.
+  FORM_ENDPOINT: "",
+  // When official registration opens on OKX. After this moment the page switches to "Registration is open" and sends people to OKX.
+  REG_OPENS: "2026-11-01T12:00:00+03:00",
+  REG_OPENS_LABEL: "Opens 1 Nov",
+  OKX_CAMPAIGN_URL: "https://www.okx.com/campaigns/ce-community-trading-competition-phase-1",
+  // Your OKX affiliate sign-up link for new accounts. Empty = the "Open my OKX account" button hides.
+  OKX_SIGNUP_URL: "",
+  // Real cap on the early list. 0 = no cap shown. Only set a number you will actually enforce.
+  EARLY_CAP: 0,
+  EARLY_TAKEN: 0,
+  SITE_URL: "https://pnlleague.com",
+};
+/* ======================================================= */
+
+const $ = (s) => document.querySelector(s);
+const params = new URLSearchParams(location.search);
+const opens = new Date(CONFIG.REG_OPENS);
+const isOpen = () => Date.now() >= opens.getTime();
+
+// attribution: ?ref=rami, plus UTMs from ads; remembered across visits
+const attr = {};
+["ref", "utm_source", "utm_medium", "utm_campaign", "utm_content", "fbclid"].forEach((k) => {
+  let v = params.get(k);
+  try { if (v) localStorage.setItem("pnl_" + k, v); else v = localStorage.getItem("pnl_" + k); } catch (e) {}
+  if (v) attr[k] = v;
+});
+
+// countdown
+function pad(n) { return String(n).padStart(2, "0"); }
+function tick() {
+  let ms = Math.max(0, opens - Date.now());
+  const d = Math.floor(ms / 864e5); ms -= d * 864e5;
+  const h = Math.floor(ms / 36e5); ms -= h * 36e5;
+  const m = Math.floor(ms / 6e4); ms -= m * 6e4;
+  const s = Math.floor(ms / 1e3);
+  const vals = { d: pad(d), h: pad(h), m: pad(m), s: pad(s) };
+  document.querySelectorAll("#countdown b").forEach((b) => (b.textContent = vals[b.dataset.u]));
+  if (isOpen()) switchToOpen();
+}
+$("#when-reg").textContent = CONFIG.REG_OPENS_LABEL;
+
+// after launch: same URL keeps working, ads keep running, everyone goes to OKX
+let switched = false;
+function switchToOpen() {
+  if (switched) return; switched = true;
+  $("#countdown").hidden = true;
+  $("#cd-note").innerHTML = '<span class="green">Registration is open.</span> Enter on OKX now.';
+  $("#join").innerHTML = `<div class="label">Registration is open</div>
+    <h2 class="h" style="margin-top:10px">Take your <span class="green">seat.</span></h2>
+    <p class="lead">Official registration is live on OKX. Join the campaign, make sure it shows "Enrolled", and start climbing.</p>
+    <a class="btn" style="margin-top:22px" href="${CONFIG.OKX_CAMPAIGN_URL}" target="_blank" rel="noopener">Register on OKX</a>
+    <p class="fine" style="margin-top:14px">18+, in Lebanon, KYC-verified OKX account. Main accounts only.</p>`;
+  document.querySelectorAll('a[href="#join"]').forEach((a) => { a.href = CONFIG.OKX_CAMPAIGN_URL; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Register on OKX"; });
+  $("#when-reg").textContent = "Open now"; $("#when-reg").classList.add("now");
+}
+tick(); setInterval(tick, 1000);
+
+// optional real cap
+if (CONFIG.EARLY_CAP > 0) {
+  const left = Math.max(0, CONFIG.EARLY_CAP - CONFIG.EARLY_TAKEN);
+  $("#cap").hidden = false;
+  requestAnimationFrame(() => ($("#cap-fill").style.width = Math.min(100, (CONFIG.EARLY_TAKEN / CONFIG.EARLY_CAP) * 100) + "%"));
+  $("#cap-text").textContent = `${left} of ${CONFIG.EARLY_CAP} early spots left`;
+}
+
+// form
+$("#form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = e.target, err = $("#err");
+  const phone = (f.phone.value || "").replace(/[^\d]/g, "");
+  if (!f.name.value.trim()) return fail("Add your name.", f.name);
+  if (phone.length < 7) return fail("Add a valid WhatsApp number.", f.phone);
+  if (!f.okx.value) return fail("Tell us about your OKX account.", f.okx);
+  if (!f.eligible.checked) return fail("The competition is for 18+ traders based in Lebanon.", f.eligible);
+  if (!f.consent.checked) return fail("We need your OK to WhatsApp you the link.", f.consent);
+  err.textContent = "";
+
+  const data = new URLSearchParams({
+    name: f.name.value.trim(), phone: (f.cc.value || "").trim() + " " + phone, okx: f.okx.value, exp: f.exp.value,
+    ts: new Date().toISOString(), page: location.href, ...attr,
+  });
+  const btn = $("#submit"); btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    if (CONFIG.FORM_ENDPOINT) await fetch(CONFIG.FORM_ENDPOINT, { method: "POST", mode: "no-cors", body: data });
+  } catch (x) {
+    btn.disabled = false; btn.textContent = "Claim my spot";
+    return fail("That didn't go through. Check your connection and try again.");
+  }
+  if (window.fbq) fbq("track", "Lead");
+  if (window.gtag) gtag("event", "generate_lead");
+  showDone(f.name.value.trim().split(" ")[0], f.okx.value);
+
+  function fail(msg, el) { err.textContent = msg; if (el) el.focus(); }
+});
+
+function showDone(first, okx) {
+  $("#done-name").textContent = first || "You're";
+  if (okx === "verified") $("#kyc-step").textContent = "Your account's verified, so you're ready. Make sure you have at least 50 USDT to deposit when it opens.";
+  const okxBtn = $("#okx-btn");
+  if (okx === "verified" || !CONFIG.OKX_SIGNUP_URL) okxBtn.hidden = true; else okxBtn.href = CONFIG.OKX_SIGNUP_URL;
+  const link = CONFIG.SITE_URL + (attr.ref ? "/?ref=" + encodeURIComponent(attr.ref) : "");
+  const msg = `Think you can trade? PNL League is Lebanon's first live trading championship. Top 12 trade live at VCore for a 5,000 USDT prize pool. Claim your spot: ${link}`;
+  $("#share-btn").href = "https://wa.me/?text=" + encodeURIComponent(msg);
+  $("#join").classList.add("is-done");
+  $("#done").focus({ preventScroll: true });
+  $("#join").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// sticky CTA on mobile once the form scrolls out of view
+const io = new IntersectionObserver(([e]) => $("#sticky").classList.toggle("show", !e.isIntersecting && !isOpen() && !$("#join").classList.contains("is-done")));
+io.observe($("#join"));
+</script>
+</body>
+</html>

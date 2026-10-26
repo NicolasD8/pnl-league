@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>PNL League · Lebanon's first live trading championship</title>
+<meta name="description" content="12 seats at the Live Finals. 5,000 USDT prize pool. Join the early list and get your registration link the minute it opens." />
+<link rel="canonical" href="https://pnlleague.com/" />
+<link rel="alternate" hreflang="en" href="https://pnlleague.com/" />
+<link rel="alternate" hreflang="ar" href="https://pnlleague.com/ar/" />
+<link rel="alternate" hreflang="x-default" href="https://pnlleague.com/" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="PNL League" />
+<meta property="og:url" content="https://pnlleague.com/" />
+<meta property="og:title" content="PNL League · 12 seats. One title." />
+<meta property="og:description" content="Lebanon's first live trading championship, presented by OKX. Join the early list." />
+<meta property="og:image" content="https://pnlleague.com/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="PNL League. 12 seats. One title. 5,000 USDT prize pool." />
+<meta property="og:locale" content="en_US" />
+<meta property="og:locale:alternate" content="ar_AR" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="PNL League · 12 seats. One title." />
+<meta name="twitter:description" content="Lebanon's first live trading championship, presented by OKX. Join the early list." />
+<meta name="twitter:image" content="https://pnlleague.com/og.png" />
+
+<meta name="theme-color" content="#0B1410" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" type="image/png" href="/favicon-48.png" sizes="48x48" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<link rel="preload" href="/assets/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/assets/site.css" />
+<script src="/assets/config.js" defer></script>
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#join">Skip to the early list</a>
+
+<header class="wrap bar">
+  <a class="brand" href="/" aria-label="PNL League by CE, home"><img src="/assets/brand/wordmark.svg" width="121" height="40" alt="PNL League by CE" /></a>
+  <div class="bar-end">
+    <div class="label presented">Presented by OKX</div>
+    <a class="lang" href="/ar/" lang="ar" hreflang="ar">عربي</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <div class="label live"><i aria-hidden="true"></i><span>Lebanon's first live trading championship</span></div>
+      <h1 class="h">12 seats.<br /><span class="green">One title.</span></h1>
+      <p class="sub">PNL League puts Lebanon's traders on a live leaderboard. The top 12 trade live at VCore Tabarja, in front of a crowd and casters, for a 5,000 USDT prize pool.</p>
+      <div class="clock" id="clock">
+        <p class="sr-only">Registration opens on OKX on 1 November 2026.</p>
+        <div class="countdown" id="countdown" role="timer" aria-label="Time until registration opens">
+          <div><b data-u="d">--</b><span>Days</span></div>
+          <div><b data-u="h">--</b><span>Hours</span></div>
+          <div><b data-u="m">--</b><span>Min</span></div>
+          <div><b data-u="s">--</b><span>Sec</span></div>
+        </div>
+        <p class="cd-note">Until registration opens on OKX. The early list closes the same moment.</p>
+      </div>
+      <p class="cd-note" id="cd-note-open" hidden></p>
+    </div>
+
+    <div class="card" id="join">
+      <div class="formhead">
+        <div class="label">Early list · Phase 1</div>
+        <h2 class="h">Claim your <span class="green">early spot.</span></h2>
+        <p class="lead">Get your registration link the minute it opens, and help getting your OKX account ready before day one.</p>
+        <div class="cap" id="cap" hidden>
+          <div class="track"><div class="fill" id="cap-fill"></div></div>
+          <p id="cap-text"></p>
+        </div>
+      </div>
+
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="name">Full name</label>
+          <input id="name" name="name" autocomplete="name" maxlength="80" required />
+        </div>
+        <div class="field">
+          <label for="phone">WhatsApp number</label>
+          <div class="phone">
+            <input id="cc" name="cc" value="+961" inputmode="tel" autocomplete="tel-country-code" maxlength="5" aria-label="Country code" />
+            <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="71 234 567" maxlength="20" required aria-describedby="err" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="okx">Your OKX account</label>
+          <select id="okx" name="okx" required>
+            <option value="" selected disabled>Choose one</option>
+            <option value="verified">I have one, KYC verified</option>
+            <option value="unverified">I have one, not verified yet</option>
+            <option value="none">I don't have one yet</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="exp">How do you trade? <span class="opt">(optional)</span></label>
+          <select id="exp" name="exp">
+            <option value="" selected>Prefer not to say</option>
+            <option value="futures">Mostly futures</option>
+            <option value="spot">Mostly spot</option>
+            <option value="both">Both</option>
+            <option value="new">Just getting started</option>
+          </select>
+        </div>
+        <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" name="website" tabindex="-1" autocomplete="off" /></div>
+        <label class="check"><input type="checkbox" id="eligible" name="eligible" required /><span>I'm 18 or older and based in Lebanon.</span></label>
+        <label class="check"><input type="checkbox" id="consent" name="consent" required /><span>PNL League can contact me on WhatsApp about the competition. No spam, and I can opt out any time.</span></label>
+        <p class="err" id="err" role="alert"></p>
+        <button class="btn" type="submit" id="submit">Claim my spot</button>
+        <p class="fine">Questions? <a href="#community" data-tg>Join our Telegram community</a> for support.</p>
+      </form>
+
+      <div class="done" id="done" tabindex="-1" aria-live="polite">
+        <span class="tick">You're on the list</span>
+        <h2 class="h" id="done-title">You're <span class="green">in.</span></h2>
+        <ol>
+          <li><span>We'll WhatsApp you the OKX registration link the moment it opens.</span></li>
+          <li><span id="kyc-step">Get your OKX account KYC verified now. It can take a while, and you need it to enter.</span></li>
+          <li><span>Join our Telegram community for support and questions.</span></li>
+          <li><span>Bring your rivals. Send them your link below.</span></li>
+        </ol>
+        <a class="btn" id="okx-btn" href="#" target="_blank" rel="noopener" hidden>Open my OKX account <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn ghost" href="#community" data-tg>Join the Telegram community</a>
+        <a class="btn ghost" id="share-btn" href="#" target="_blank" rel="noopener">Challenge a friend on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>Mind over market</span><span>12 seats</span><span>5,000 USDT prize pool</span><span>VCore Tabarja</span><span>Live leaderboards every 5 min</span><span>#PNLLeague</span>
+      <span aria-hidden="true">Mind over market</span><span aria-hidden="true">12 seats</span><span aria-hidden="true">5,000 USDT prize pool</span><span aria-hidden="true">VCore Tabarja</span><span aria-hidden="true">Live leaderboards every 5 min</span><span aria-hidden="true">#PNLLeague</span>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="wrap">
+      <div class="stat big"><b class="num">5,000</b><span>USDT prize pool</span><em>Live Finals, VCore Tabarja</em></div>
+      <div class="stat"><b class="num">1,000</b><span>USDT rewards</span><em>Online League (trading bonus)</em></div>
+      <div class="stat"><b class="num">12</b><span>Finalists</span><em>From the whole of Lebanon</em></div>
+      <div class="stat"><b class="num">6H</b><span>Live trading</span><em>Casters, crowd, livestream</em></div>
+    </div>
+  </div>
+
+  <div class="partners">
+    <div class="wrap">
+      <div class="partner"><span class="label">Presented by</span><span class="plogo" data-logo="okx"><span class="ptext">OKX</span></span></div>
+      <div class="partner"><span class="label">Community partner</span><span class="plogo"><img src="/assets/brand/ce-mark.svg" width="35" height="40" alt="" /><span class="ptext sm">Crypto Exchangers<br />Lebanon</span></span></div>
+      <div class="partner"><span class="label">Live Finals venue</span><span class="plogo" data-logo="vcore"><span class="ptext">VCore <small>Tabarja</small></span></span></div>
+    </div>
+  </div>
+
+  <section class="s wrap" id="how" aria-labelledby="how-h">
+    <div class="s-head">
+      <div>
+        <div class="label">How it works</div>
+        <h2 class="h" id="how-h">Sign up. Trade.<br />Climb. <span class="green">Finals.</span></h2>
+      </div>
+      <ol class="steps">
+        <li><span class="n" aria-hidden="true">01</span><div><h3>Join the early list</h3><p>Right here. Takes 20 seconds.</p><span class="when now" data-before-open>Now</span></div></li>
+        <li><span class="n" aria-hidden="true">02</span><div><h3>Register on OKX</h3><p>We send you the registration link the moment registration opens. You'll need a KYC-verified OKX account, a 50 USDT minimum deposit and 5,000 USDT minimum trading volume to rank.</p><span class="when" id="when-reg">Opens 1 Nov</span></div></li>
+        <li><span class="n" aria-hidden="true">03</span><div><h3>Climb two leaderboards</h3><p>PnL and Trading Volume, updated live every 5 minutes. Futures and spot both count. Rewards from both are added up, and the 12 highest totals make the Finals.</p></div></li>
+        <li><span class="n" aria-hidden="true">04</span><div><h3>Trade live at VCore</h3><p>Six hours of live trading at VCore Tabarja, with casters, a crowd and a livestream on TikTok and Instagram. One title.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="s road" id="road" aria-labelledby="road-h">
+    <div class="wrap">
+      <div class="label">Road to the title</div>
+      <h2 class="h" id="road-h">From the leaderboard to the big <span class="green">screen.</span></h2>
+      <ol class="bracket">
+        <li class="rd rd-1">
+          <div class="pair">
+            <div class="node"><span class="rd-tag">Round 1 · Online</span><b>PnL</b><span>Leaderboard, live every 5 min</span></div>
+            <div class="node"><span class="rd-tag">Round 1 · Online</span><b>Volume</b><span>Leaderboard, live every 5 min</span></div>
+          </div>
+        </li>
+        <li class="rd rd-2"><div class="node"><span class="rd-tag">Combined</span><b>Rewards added up</b><span>Both leaderboards, one total</span></div></li>
+        <li class="rd rd-3"><div class="node"><span class="rd-tag">The cut</span><b>Top 12</b><span class="slots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span>Highest totals qualify</span></div></li>
+        <li class="rd rd-4"><div class="node"><span class="rd-tag">Round 2 · Live Finals</span><b>VCore Tabarja</b><span>6 hours live, casters, crowd</span></div></li>
+        <li class="rd rd-5"><div class="node win"><span class="rd-tag">Champion</span><b>One title</b><span>Mind over market</span></div></li>
+      </ol>
+      <div class="reqs">
+        <span class="label">To rank you need</span>
+        <ul>
+          <li><b>KYC</b><span>Verified OKX main account</span></li>
+          <li><b>50 USDT</b><span>Minimum deposit</span></li>
+          <li><b>5,000 USDT</b><span>Minimum trading volume</span></li>
+          <li><b>Futures + spot</b><span>Both count</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="s finals" aria-labelledby="finals-h">
+    <div class="wrap">
+      <div class="s-head">
+        <div>
+          <div class="label">The Live Finals</div>
+          <h2 class="h" id="finals-h">No screenshots. No stories. Just the leaderboard.</h2>
+        </div>
+        <div>
+          <p>Trading has always been a solo sport. Not anymore. The 12 finalists sit side by side at VCore Tabarja, Lebanon's biggest esports venue, for six hours of live trading. Every position on the big screen, every move called live.</p>
+          <p class="muted">Date announced with the registration opening.</p>
+        </div>
+      </div>
+      <div class="seats" aria-hidden="true">
+        <span>01</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span><span>07</span><span>08</span><span>09</span><span>10</span><span>11</span><span>12</span>
+      </div>
+      <div class="crew">
+        <div class="person" data-person="rami">
+          <span class="avatar" aria-hidden="true"><img data-photo alt="" hidden /><em>R</em></span>
+          <b>Rami</b><span class="role">Caster</span><p>Casts the Live Finals and streams it on TikTok and Instagram.</p>
+          <span class="socials"><a data-social="instagram" target="_blank" rel="noopener" hidden>Instagram</a><a data-social="tiktok" target="_blank" rel="noopener" hidden>TikTok</a></span>
+        </div>
+        <div class="person" data-person="rich">
+          <span class="avatar" aria-hidden="true"><img data-photo alt="" hidden /><em>R</em></span>
+          <b>Rich</b><span class="role">Coach</span><p>Coaches all 12 finalists on the night. Same coach, one winner.</p>
+          <span class="socials"><a data-social="instagram" target="_blank" rel="noopener" hidden>Instagram</a><a data-social="tiktok" target="_blank" rel="noopener" hidden>TikTok</a></span>
+        </div>
+        <div class="person">
+          <span class="avatar you" aria-hidden="true"><em>?</em></span>
+          <b>You?</b><span class="role">Finalist</span><p>Twelve seats. Make the top 12 on the leaderboard and one of them is yours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="community" id="community" aria-labelledby="tg-h">
+    <div class="wrap">
+      <div>
+        <div class="label">The PNL League community</div>
+        <h2 class="h" id="tg-h">Questions?<br />Join the community.</h2>
+      </div>
+      <div>
+        <p>Join our Telegram community for support and questions. We help with your OKX account, KYC and anything about the competition.</p>
+        <ul class="tg-list">
+          <li>Account and KYC help</li>
+          <li>Answers to your questions</li>
+          <li>Updates as they happen</li>
+        </ul>
+        <a class="btn dark" href="#community" data-tg>Join on Telegram <span class="arr" aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="s wrap faq" aria-labelledby="faq-h">
+    <div class="s-head">
+      <div>
+        <div class="label">Questions</div>
+        <h2 class="h" id="faq-h">Before you <span class="green">ask.</span></h2>
+      </div>
+      <div>
+        <details><summary>Why join the early list?</summary><p>You get the registration link the moment it opens on OKX, and we help you get your account ready before then so you can start on day one.</p></details>
+        <details><summary>Who can enter?</summary><p>Anyone 18 or older, based in Lebanon, with a KYC-verified OKX account. Main accounts only, no sub-accounts.</p></details>
+        <details><summary>I already have an OKX account.</summary><p>Good. Pick "I have one" in the form. Some existing accounts need to be linked to the competition before they're eligible. We'll check yours with you before registration opens.</p></details>
+        <details><summary>What can I win?</summary><p>The 12 finalists compete for a 5,000 USDT prize pool at the Live Finals. During the Online League, 1,000 USDT in trading-bonus rewards is shared across the two leaderboards.</p></details>
+        <details><summary>How are the 12 finalists chosen?</summary><p>There are two live leaderboards, PnL and Trading Volume. Your rewards from both are added up, and the 12 highest totals qualify. You need a 50 USDT minimum deposit and 5,000 USDT minimum trading volume to rank. Wash trading and multiple accounts get you disqualified.</p></details>
+        <details><summary>Where can I get help?</summary><p>Join our <a href="#community" data-tg>Telegram community</a>. We answer questions there and help you with your OKX account and KYC, before registration opens and during the competition.</p></details>
+        <details><summary>What happens to my number?</summary><p>We use it only to send you competition updates on WhatsApp. We don't sell or share it, and you can ask us to delete it any time.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="closer wrap" aria-labelledby="closer-h">
+    <div class="label">Mind over market</div>
+    <h2 class="h" id="closer-h">Think you can<br /><span class="green">trade?</span></h2>
+    <a class="btn" href="#join" data-cta><span data-cta-label>Claim my spot</span></a>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <img class="footer-logo" src="/assets/brand/logo-stacked.svg" width="66" height="92" alt="PNL League by CE" loading="lazy" />
+      <p class="disc" style="margin-top: 22px">18+. KYC required. Trading involves risk.</p>
+      <p class="risk">PNL League is a trading competition. Nothing on this page is investment advice or a recommendation to trade. Digital assets are volatile and you can lose some or all of what you put in. Competition terms are set by OKX on the OKX campaign page.</p>
+    </div>
+    <div class="credits">PNL League by CE · Presented by OKX<br />@pnlleague · @okx_mena · @cryptoexchangersleb<br />#PNLLeague #MindOverMarket<br /><a href="#community" data-tg>Telegram community</a></div>
+  </div>
+</footer>
+
+<div class="sticky" id="sticky"><a class="btn" href="#join" data-cta><span data-cta-label>Claim my spot</span></a></div>
+</body>
+</html>

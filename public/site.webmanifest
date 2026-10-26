@@ -1,0 +1,12 @@
+{
+  "name": "PNL League",
+  "short_name": "PNL League",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#0B1410",
+  "theme_color": "#0B1410",
+  "icons": [
+    { "src": "/assets/brand/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/brand/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
