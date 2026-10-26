@@ -125,7 +125,7 @@ const log = (label) => console.log("✓", label);
 
   // 9. Apps Script phone normaliser
   const gs = fs.readFileSync(path.join(__dirname, "../apps-script/Code.gs"), "utf8");
-  const fn = new Function(gs.match(/function normalisePhone_[\s\S]*?\n}\n/)[0] + "; return normalisePhone_;")();
+  const fn = new Function(gs.replace(/\r\n/g, "\n").match(/function normalisePhone_[\s\S]*?\n}\n/)[0] + "; return normalisePhone_;")();
   [["+96171234567", "+96171234567"], ["96171234567", "+96171234567"], ["03 123 456", "+9613123456"], ["+961 3 123 456", "+9613123456"], ["0096176123456", "+96176123456"], ["+33612345678", "+33612345678"], ["+961 12", ""]]
     .forEach(([i, o]) => assert.equal(fn(i), o, i));
   log("Sheet phone normaliser (Lebanese + international)");
