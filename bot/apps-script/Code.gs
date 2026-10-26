@@ -21,7 +21,8 @@ const SAVEABLE = ["username", "first_name", "last_name", "lang", "name", "phone"
 function doPost(e) {
   let body;
   try { body = JSON.parse(e.postData.contents); } catch (err) { return json_({ ok: false, error: "bad json" }); }
-  if (!body.secret || body.secret !== prop_("SHEET_SECRET")) return json_({ ok: false, error: "unauthorised" });
+  const expected = prop_("SHEET_SECRET"), got = String(body.secret || "").trim();
+  if (!expected || got !== expected) return json_({ ok: false, error: "unauthorised (secret lengths: sheet " + expected.length + ", request " + got.length + ")" });
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
@@ -236,7 +237,7 @@ function menuStats_() {
 
 /* ---------------- helpers ---------------- */
 
-function prop_(k) { return PropertiesService.getScriptProperties().getProperty(k) || ""; }
+function prop_(k) { return String(PropertiesService.getScriptProperties().getProperty(k) || "").trim(); } // trim: pasted values often carry a trailing space/newline
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function clip_(v, n) { return String(v == null ? "" : v).trim().slice(0, n); }
 function blank_(cols) { const o = {}; cols.forEach(function (c) { o[c] = ""; }); return o; }
