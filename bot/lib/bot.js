@@ -13,7 +13,7 @@ function countdown(ms, lang) {
   return d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-function createBot({ tg, db, cfg, now = () => Date.now() }) {
+function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require("./card").renderCard(o) }) {
   const admins = new Set(String(cfg.ADMIN_IDS || "").split(",").map((s) => s.trim()).filter(Boolean));
   const adminChat = cfg.ADMIN_CHAT_ID || [...admins][0];
   const opensAt = new Date(cfg.REG_OPENS || "2026-11-01T12:00:00+03:00").getTime();
@@ -82,6 +82,24 @@ function createBot({ tg, db, cfg, now = () => Date.now() }) {
     kb.push([url(L.bInvite, share)]);
     kb.push([btn(L.bBack, "m:home")]);
     await tg.send(chat, L.done(esc(firstName(row)), kyc), { reply_markup: { inline_keyboard: kb } });
+    await sendCard(chat, row);
+  }
+
+  const inviteLink = (row) => {
+    const ref = row.ref && REF_RE.test(row.ref) ? row.ref : "";
+    return `https://t.me/${cfg.BOT_USERNAME}${ref ? "?start=" + ref : ""}`;
+  };
+
+  // The shareable contender card. Never lets a rendering problem break signup.
+  async function sendCard(chat, row) {
+    const L = t(row.lang);
+    try {
+      const png = card({ name: row.name || row.first_name, no: row.no, link: inviteLink(row) });
+      const share = `https://t.me/share/url?url=${encodeURIComponent(inviteLink(row))}&text=${encodeURIComponent(L.inviteText)}`;
+      await tg.sendPhoto(chat, png, { caption: L.cardCaption(row.no), parse_mode: "HTML", reply_markup: { inline_keyboard: [[url(L.bInvite, share)]] } });
+    } catch (err) {
+      console.error("card failed", err && err.message);
+    }
   }
 
   /* ---------- admin ---------- */
@@ -157,6 +175,11 @@ function createBot({ tg, db, cfg, now = () => Date.now() }) {
     if (cmd === "/delete") {
       await db.save(row.tg_id, { deleted: "yes", consent: "no", step: "", status: "", name: "", phone: "", okx: "", exp: "", eligible: "", username: "", first_name: "", last_name: "", dup: "" });
       return tg.send(chat, L.deleted, { reply_markup: { remove_keyboard: true } });
+    }
+    if (cmd === "/card") {
+      if (row.status !== "complete") return tg.send(chat, L.cardNotYet, { reply_markup: menu(L, row) });
+      if (!row.no) row = await db.save(row.tg_id, {}); // older signups get their number now
+      return sendCard(chat, row);
     }
     if (cmd === "/ask") { await db.save(row.tg_id, { step: "question" }); return tg.send(chat, L.askQ, { reply_markup: { force_reply: true } }); }
 

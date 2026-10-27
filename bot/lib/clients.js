@@ -16,8 +16,19 @@ function telegram(token, fetchImpl = fetch) {
     }
     return j.result;
   }
+  async function sendPhoto(chat_id, png, extra = {}) {
+    const form = new FormData();
+    form.append("chat_id", String(chat_id));
+    form.append("photo", new Blob([png], { type: "image/png" }), "pnl-league-card.png");
+    for (const [k, v] of Object.entries(extra)) form.append(k, typeof v === "string" ? v : JSON.stringify(v));
+    const r = await fetchImpl(base + "sendPhoto", { method: "POST", body: form });
+    const j = await r.json().catch(() => ({ ok: false }));
+    if (!j.ok) throw new Error(`telegram sendPhoto: ${j.description || r.status}`);
+    return j.result;
+  }
   return {
     call,
+    sendPhoto,
     send: (chat_id, text, extra = {}) =>
       call("sendMessage", { chat_id, text, parse_mode: "HTML", disable_web_page_preview: true, ...extra }),
     answer: (callback_query_id, text) => call("answerCallbackQuery", { callback_query_id, text }).catch(() => {}),

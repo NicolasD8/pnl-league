@@ -4,5 +4,9 @@
   "description": "PNL League Telegram bot: early list, FAQ, questions, broadcasts. Vercel + Google Sheets, no dependencies.",
   "scripts": {
     "test": "node test/simulate.js"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "2.6.2",
+    "qrcode": "1.5.4"
   }
 }

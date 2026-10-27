@@ -12,7 +12,7 @@
 const USERS = "Users";
 const BROADCASTS = "Broadcasts";
 const UCOLS = ["tg_id", "username", "first_name", "last_name", "language_code", "lang", "name", "phone", "okx", "exp",
-  "eligible", "consent", "status", "step", "ref", "dup", "blocked", "deleted", "created", "updated"];
+  "eligible", "consent", "status", "step", "ref", "dup", "blocked", "deleted", "created", "updated", "no"];
 const BCOLS = ["id", "status", "kind", "payload", "admin_chat", "recipients", "cursor", "sent", "failed", "blocked", "created", "finished"];
 const SAVEABLE = ["username", "first_name", "last_name", "lang", "name", "phone", "okx", "exp", "eligible", "consent", "status", "step", "dup", "deleted", "blocked"];
 
@@ -85,9 +85,18 @@ function save_(id, fields) {
       if (hit) row.dup = "DUPLICATE phone, row " + hit.getRow();
     }
   }
+  // contender number: handed out once, in signup order, when someone finishes
+  if (row.status === "complete" && !row.no) row.no = nextNo_(sh);
   row.updated = new Date();
   writeRow_(sh, r, row);
   return row;
+}
+
+function nextNo_(sh) {
+  const col = UCOLS.indexOf("no") + 1, n = sh.getLastRow() - 1;
+  if (n < 1) return 1;
+  const max = sh.getRange(2, col, n, 1).getValues().reduce(function (m, v) { return Math.max(m, Number(v[0]) || 0); }, 0);
+  return String(max + 1);
 }
 
 function isRecipient_(u) {
@@ -247,6 +256,7 @@ function sheet_(name, header) {
   let sh = ss.getSheetByName(name);
   if (!sh) { sh = ss.insertSheet(name); }
   if (sh.getLastRow() === 0) { sh.appendRow(header); sh.setFrozenRows(1); sh.getRange("A:A").setNumberFormat("@"); }
+  else if (sh.getLastColumn() < header.length) sh.getRange(1, 1, 1, header.length).setValues([header]); // new columns added in an update
   return sh;
 }
 function findRow_(sh, id) {

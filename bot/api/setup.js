@@ -19,6 +19,7 @@ module.exports = async (req, res) => {
     const en = [
       { command: "start", description: "Start / main menu" },
       { command: "join", description: "Join the early list" },
+      { command: "card", description: "Get my contender card" },
       { command: "ask", description: "Ask the PNL League team a question" },
       { command: "language", description: "English / العربية" },
       { command: "stop", description: "Stop all messages" },
@@ -27,6 +28,7 @@ module.exports = async (req, res) => {
     const ar = [
       { command: "start", description: "البداية / القائمة الرئيسية" },
       { command: "join", description: "انضم إلى القائمة المبكرة" },
+      { command: "card", description: "احصل على بطاقتي كمتنافس" },
       { command: "ask", description: "اطرح سؤالًا على فريق PNL League" },
       { command: "language", description: "English / العربية" },
       { command: "stop", description: "إيقاف كل الرسائل" },

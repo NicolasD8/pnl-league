@@ -11,6 +11,7 @@ const tg = {
   answer: async () => {},
   clearButtons: async () => {},
   call: async () => ({}),
+  sendPhoto: async (chat, png, extra = {}) => { sent.push({ chat: String(chat), photo: png, text: extra.caption || "", kb: extra.reply_markup }); return {}; },
 };
 const users = new Map();
 const broadcasts = new Map();
@@ -23,7 +24,11 @@ const db = {
     if (r.deleted !== "yes") Object.assign(r, pick(user));
     return { ...r };
   },
-  async save(id, fields) { const r = users.get(String(id)); Object.assign(r, fields); return { ...r }; },
+  async save(id, fields) {
+    const r = users.get(String(id)); Object.assign(r, fields);
+    if (r.status === "complete" && !r.no) r.no = String([...users.values()].reduce((m, u) => Math.max(m, Number(u.no) || 0), 0) + 1);
+    return { ...r };
+  },
   async stats() {
     const rows = [...users.values()], done = rows.filter((u) => u.status === "complete");
     const count = (k) => done.reduce((a, u) => ((a[u[k] || "(direct)"] = (a[u[k] || "(direct)"] || 0) + 1), a), {});
@@ -70,12 +75,16 @@ const log = (label) => console.log("✓", label);
   await tap(101, "exp:futures");
   await tap(101, "elig:yes");
   await tap(101, "consent:yes");
-  const done = last(101);
+  const cardMsg = last(101);
+  assert.ok(cardMsg.photo && cardMsg.photo.length > 20000, "contender card PNG sent"); assert.match(cardMsg.text, /#0001/);
+  assert.deepStrictEqual([...cardMsg.photo.slice(0, 4)], [0x89, 0x50, 0x4e, 0x47], "is a PNG");
+  const done = sent[sent.length - 2];
   assert.match(done.text, /You're in, Test/); assert.match(done.text, /KYC verified now/);
   assert.ok(buttons(done).includes(cfg.OKX_SIGNUP_URL), "affiliate button for unverified");
   assert.ok(buttons(done).some((u) => u && u.includes("t.me/share/url") && decodeURIComponent(u).includes("t.me/PNLLeagueBot?start=rami")), "invite carries ref");
   assert.equal(users.get("101").status, "complete");
   log("signup: name validation, own-contact check, stale buttons ignored, done screen with affiliate + invite link");
+  log("contender card: real PNG rendered and sent after signup, numbered #0001");
 
   // 3. returning user
   await msg(101, "/start"); assert.match(last(101).text, /You're on the list, <b>Test<\/b>/); assert.ok(!buttons(last(101)).includes("join"));
@@ -86,7 +95,10 @@ const log = (label) => console.log("✓", label);
   assert.match(last(202).text, /أول بطولة تداول مباشرة/);
   await tap(202, "join"); await msg(202, "سارة خوري"); await msg(202, "تخطَّ");
   await tap(202, "okx:verified"); await tap(202, "exp:"); await tap(202, "elig:yes"); await tap(202, "consent:yes");
-  assert.match(last(202).text, /أنت معنا يا سارة/); assert.ok(!buttons(last(202)).includes(cfg.OKX_SIGNUP_URL), "no affiliate button for verified");
+  assert.match(sent[sent.length - 2].text, /أنت معنا يا سارة/); assert.ok(!buttons(sent[sent.length - 2]).includes(cfg.OKX_SIGNUP_URL), "no affiliate button for verified");
+  assert.match(last(202).text, /#0002/); assert.ok(last(202).photo, "Arabic card sent");
+  await msg(303, "/card"); assert.match(last(303).text, /unlocks when you join/);
+  await msg(101, "/card"); assert.ok(last(101).photo && /#0001/.test(last(101).text), "/card resends same number");
   await msg(303, "/start"); await tap(303, "lang:en"); await tap(303, "join"); await msg(303, "Minor Person"); await msg(303, "Skip");
   await tap(303, "okx:none"); await tap(303, "exp:new"); await tap(303, "elig:no");
   assert.match(last(303).text, /open to traders 18 or older/); assert.equal(users.get("303").status, "ineligible");

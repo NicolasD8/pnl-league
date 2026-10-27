@@ -78,6 +78,12 @@ const en = {
   kycDone: "Your account's verified, so you're ready. Make sure you have at least 50 USDT to deposit when it opens.",
   inviteText: "PNL League is Lebanon's first live trading championship. The top 12 trade live at VCore for a 5,000 USDT prize pool. Join the early list:",
   useTypeHint: "Tap a button above to answer.",
+  cardCaption: (no) => `<b>Your contender card${no ? " · #" + String(no).padStart(4, "0") : ""}</b>
+
+Post it on your story, tag @pnlleague and challenge your rivals. The QR brings them straight here.
+
+#PNLLeague #MindOverMarket`,
+  cardNotYet: "Your contender card unlocks when you join the early list.",
 
   // questions
   askQ: "Type your question and someone from PNL League will reply here.",
@@ -165,6 +171,12 @@ const ar = {
   kycDone: "حسابك موثّق، أنت جاهز. تأكّد أن لديك 50 USDT على الأقل للإيداع عند فتح التسجيل.",
   inviteText: "PNL League أول بطولة تداول مباشرة في لبنان. أفضل 12 يتداولون مباشرةً في VCore على مجموع جوائز بقيمة 5,000 USDT. انضم إلى القائمة المبكرة:",
   useTypeHint: "اضغط أحد الأزرار أعلاه للإجابة.",
+  cardCaption: (no) => `<b>بطاقتك كمتنافس${no ? " · #" + String(no).padStart(4, "0") : ""}</b>
+
+انشرها على الستوري، أشِر إلى @pnlleague وتحدَّ منافسيك. رمز QR يوصلهم مباشرةً إلى هنا.
+
+#PNLLeague #MindOverMarket`,
+  cardNotYet: "تُفتح بطاقتك كمتنافس عند انضمامك إلى القائمة المبكرة.",
 
   askQ: "اكتب سؤالك وسيردّ عليك أحد فريق PNL League هنا.",
   qSent: "وصلنا سؤالك. سنردّ عليك هنا في أقرب وقت.",
