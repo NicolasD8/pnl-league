@@ -14,6 +14,7 @@ const BROADCASTS = "Broadcasts";
 const UCOLS = ["tg_id", "username", "first_name", "last_name", "language_code", "lang", "name", "phone", "okx", "exp",
   "eligible", "consent", "status", "step", "ref", "dup", "blocked", "deleted", "created", "updated", "no"];
 const BCOLS = ["id", "status", "kind", "payload", "admin_chat", "recipients", "cursor", "sent", "failed", "blocked", "created", "finished"];
+const FIRST_NO = 15; // first contender number handed out
 const SAVEABLE = ["username", "first_name", "last_name", "lang", "name", "phone", "okx", "exp", "eligible", "consent", "status", "step", "dup", "deleted", "blocked"];
 
 /* ---------------- web app ---------------- */
@@ -94,8 +95,8 @@ function save_(id, fields) {
 
 function nextNo_(sh) {
   const col = UCOLS.indexOf("no") + 1, n = sh.getLastRow() - 1;
-  if (n < 1) return 1;
-  const max = sh.getRange(2, col, n, 1).getValues().reduce(function (m, v) { return Math.max(m, Number(v[0]) || 0); }, 0);
+  if (n < 1) return String(FIRST_NO);
+  const max = sh.getRange(2, col, n, 1).getValues().reduce(function (m, v) { return Math.max(m, Number(v[0]) || 0); }, FIRST_NO - 1);
   return String(max + 1);
 }
 
