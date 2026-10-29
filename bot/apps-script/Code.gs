@@ -108,7 +108,16 @@ function isRecipient_(u) {
 function isUnfinished_(u) {
   return u.tg_id && u.status !== "complete" && u.status !== "ineligible" && u.consent !== "no" && u.blocked !== "yes" && u.deleted !== "yes";
 }
-function audience_(name) { return name === "unfinished" ? isUnfinished_ : isRecipient_; }
+// filter (optional) narrows the audience further, e.g. { okx: ["none","unverified"] } or { ref: ["rich"], lang: ["ar"] }
+function audience_(name, filter) {
+  const base = name === "unfinished" ? isUnfinished_ : isRecipient_;
+  const f = filter || {};
+  const keys = Object.keys(f).filter(function (k) { return ["okx", "ref", "lang", "exp"].indexOf(k) >= 0 && Array.isArray(f[k]) && f[k].length; });
+  return function (u) {
+    if (!base(u)) return false;
+    return keys.every(function (k) { return f[k].indexOf(String(u[k] || "")) >= 0; });
+  };
+}
 
 function stats_() {
   const rows = allRows_(sheet_(USERS, UCOLS));
@@ -133,10 +142,11 @@ function stats_() {
 function draftBroadcast_(payload) {
   const sh = sheet_(BROADCASTS, BCOLS);
   const audience = payload.audience === "unfinished" ? "unfinished" : "signed_up";
-  const recipients = allRows_(sheet_(USERS, UCOLS)).filter(audience_(audience)).length;
+  const filter = payload.filter && typeof payload.filter === "object" ? payload.filter : null;
+  const recipients = allRows_(sheet_(USERS, UCOLS)).filter(audience_(audience, filter)).length;
   const b = blank_(BCOLS);
   b.id = String(Date.now()); b.status = "draft"; b.kind = clip_(payload.kind, 20);
-  b.payload = JSON.stringify({ text: payload.text || {}, button: payload.button || null, audience: audience });
+  b.payload = JSON.stringify({ text: payload.text || {}, button: payload.button || null, audience: audience, filter: filter });
   b.admin_chat = clip_(payload.admin_chat, 30); b.recipients = recipients; b.cursor = 2; b.sent = 0; b.failed = 0; b.blocked = 0; b.created = new Date();
   writeRow_(sh, sh.getLastRow() + 1, b, BCOLS);
   return { id: b.id, recipients: recipients };
@@ -148,7 +158,7 @@ function sendBroadcast_(id) {
   if (!r) return { started: false, error: "not found" };
   const b = readRow_(sh, r, BCOLS);
   if (b.status !== "draft") return { started: false, error: "status is " + b.status };
-  b.status = "queued"; b.recipients = allRows_(sheet_(USERS, UCOLS)).filter(audience_(JSON.parse(b.payload).audience)).length;
+  b.status = "queued"; b.recipients = allRows_(sheet_(USERS, UCOLS)).filter((function (p) { return audience_(p.audience, p.filter); })(JSON.parse(b.payload))).length;
   writeRow_(sh, r, b, BCOLS);
   scheduleWorker_(1);
   return { started: true, recipients: b.recipients };
@@ -187,7 +197,7 @@ function processBroadcasts() {
     while (cursor <= last) {
       if (Date.now() - started > 4.5 * 60 * 1000) break;
       const u = users[cursor - 2];
-      if (audience_(p.audience)(u)) {
+      if (audience_(p.audience, p.filter)(u)) {
         const lang = u.lang === "ar" ? "ar" : "en";
         const params = { chat_id: u.tg_id, text: p.text[lang] || p.text.en, parse_mode: "HTML", disable_web_page_preview: true };
         const bt = p.button && p.button[lang];

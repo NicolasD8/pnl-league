@@ -90,6 +90,12 @@ Registration opens on OKX on <b>1 Nov</b>, and we'll send the link here to every
 
 Tap below to finish. It takes 20 seconds.`,
   bResume: "Finish my signup",
+  okxNudge: (link) => `One thing before registration opens on 1 Nov: you need a <b>KYC-verified OKX account</b> to compete.
+
+Verification can take a while, so start now. Open your account with this link, then complete identity verification in the OKX app:
+${link}
+
+<i>18+. KYC required. Trading involves risk.</i>`,
 
   // questions
   askQ: "Type your question and someone from PNL League will reply here.",
@@ -189,6 +195,12 @@ const ar = {
 
 اضغط أدناه لإكمال التسجيل. تستغرق 20 ثانية.`,
   bResume: "أكمل تسجيلي",
+  okxNudge: (link) => `أمر واحد قبل فتح التسجيل في 1 تشرين الثاني: تحتاج إلى <b>حساب OKX موثّق (KYC)</b> لتشارك.
+
+قد يستغرق التحقق بعض الوقت، لذا ابدأ الآن. افتح حسابك عبر هذا الرابط، ثم أكمل التحقق من الهوية في تطبيق OKX:
+${link}
+
+<i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
 
   askQ: "اكتب سؤالك وسيردّ عليك أحد فريق PNL League هنا.",
   qSent: "وصلنا سؤالك. سنردّ عليك هنا في أقرب وقت.",

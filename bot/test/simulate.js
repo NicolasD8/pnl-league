@@ -37,7 +37,9 @@ const db = {
   async draftBroadcast(p) {
     const id = String(broadcasts.size + 1); broadcasts.set(id, { ...p, status: "draft" });
     const unfinished = (u) => u.status !== "complete" && u.status !== "ineligible" && u.consent !== "no" && u.deleted !== "yes";
-    return { id, recipients: [...users.values()].filter(p.audience === "unfinished" ? unfinished : (u) => u.status === "complete" && u.consent === "yes").length };
+    const base = p.audience === "unfinished" ? unfinished : (u) => u.status === "complete" && u.consent === "yes";
+    const f = p.filter || {};
+    return { id, recipients: [...users.values()].filter((u) => base(u) && Object.keys(f).every((k) => f[k].includes(String(u[k] || "")))).length };
   },
   async sendBroadcast(id) { const b = broadcasts.get(id); if (b.status !== "draft") return { started: false, error: "status is " + b.status }; b.status = "queued"; return { started: true, recipients: 1 }; },
   async cancelBroadcast(id) { broadcasts.get(id).status = "cancelled"; return {}; },
@@ -135,6 +137,11 @@ const log = (label) => console.log("✓", label);
   assert.equal([...broadcasts.values()].pop().audience, "unfinished");
   await tap(505, "resume"); assert.match(last(505).text, /Share your phone number/);
   await tap(101, "resume"); assert.match(last(101).text, /You're on the list/);
+  await msg(900, "/okx");
+  assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people \(signed up, no OKX account or not verified\)/); // 101 unverified yes; 202 verified (and opted out) no
+  assert.match(sent[sent.length - 2].text, /KYC-verified OKX account/); assert.ok(sent[sent.length - 2].text.includes(cfg.OKX_SIGNUP_URL), "link shown in text"); assert.deepStrictEqual(buttons(sent[sent.length - 2]), [cfg.OKX_SIGNUP_URL]);
+  assert.deepStrictEqual([...broadcasts.values()].pop().filter, { okx: ["none", "unverified"] });
+  log("/okx targets only signed-up people without a verified OKX account, with the affiliate button");
   log("/nudge targets only unfinished signups; 'Finish my signup' resumes at the exact step; finished users just see the menu");
 
   // 7. stop / delete
