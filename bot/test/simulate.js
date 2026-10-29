@@ -150,6 +150,10 @@ const log = (label) => console.log("✓", label);
   await msg(101, "/start"); assert.ok(!buttons(last(101)).includes("okxu"), "button gone once verified");
   await tap(303, "okxu"); assert.ok(!/Where's your OKX/.test(last(303).text), "only signed-up users can update");
   await tap(101, "okxu:none"); assert.equal(users.get("101").okx, "none"); assert.ok(last(101).text.includes(cfg.OKX_SIGNUP_URL));
+  await msg(900, "/okxcheck");
+  assert.match(sent[sent.length - 3].text, /\(signed up, no OKX account or not verified\)/);
+  assert.deepStrictEqual(buttons(sent[sent.length - 2]), ["okxu"]); assert.deepStrictEqual([...broadcasts.values()].pop().filter, { okx: ["none", "unverified"] });
+  log("/okxcheck asks only non-verified signups to update their OKX status (one-tap button)");
   log("'Update my OKX status': signed-up users update okx themselves; link shown if still none; button hides once verified");
   log("/nudge targets only unfinished signups; 'Finish my signup' resumes at the exact step; finished users just see the menu");
 

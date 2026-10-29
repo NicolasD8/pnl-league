@@ -116,9 +116,11 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         `<b>Language</b> EN ${s.by_lang.en || 0} · AR ${s.by_lang.ar || 0}\n\n<b>By source</b>\n${top}`);
       return true;
     }
-    if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/nudge" || cmd === "/okx") {
+    if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/nudge" || cmd === "/okx" || cmd === "/okxcheck") {
       let payload;
-      if (cmd === "/okx") {
+      if (cmd === "/okxcheck") {
+        payload = { kind: "okxcheck", audience: "signed_up", filter: { okx: ["none", "unverified"] }, text: { en: t("en").okxCheck, ar: t("ar").okxCheck }, button: { en: { text: t("en").bOkxUpdate, data: "okxu" }, ar: { text: t("ar").bOkxUpdate, data: "okxu" } } };
+      } else if (cmd === "/okx") {
         if (!cfg.OKX_SIGNUP_URL) { await tg.send(chat, "Set OKX_SIGNUP_URL in Vercel first (your OKX affiliate link), then redeploy."); return true; }
         payload = { kind: "okx", audience: "signed_up", filter: { okx: ["none", "unverified"] }, text: { en: t("en").okxNudge(cfg.OKX_SIGNUP_URL), ar: t("ar").okxNudge(cfg.OKX_SIGNUP_URL) }, button: { en: { text: t("en").bOpenOkx, url: cfg.OKX_SIGNUP_URL }, ar: { text: t("ar").bOpenOkx, url: cfg.OKX_SIGNUP_URL } } };
       } else if (cmd === "/nudge") {
@@ -130,7 +132,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         payload = { kind: "text", text: { en: esc(arg), ar: esc(arg) } };
       }
       const d = await db.draftBroadcast({ ...payload, admin_chat: String(chat) });
-      const who = payload.audience === "unfinished" ? "started but didn't finish signup" : payload.kind === "okx" ? "signed up, no OKX account or not verified" : "signed up, opted in";
+      const who = payload.audience === "unfinished" ? "started but didn't finish signup" : payload.kind === "okx" || payload.kind === "okxcheck" ? "signed up, no OKX account or not verified" : "signed up, opted in";
       await tg.send(chat, `<b>Preview</b> · goes to <b>${d.recipients}</b> people (${who}):`);
       const pb = payload.button && payload.button.en;
       await tg.send(chat, payload.text[row.lang === "ar" ? "ar" : "en"], pb ? { reply_markup: { inline_keyboard: [[pb.data ? btn(pb.text, pb.data) : url(pb.text, pb.url)]] } } : {});
