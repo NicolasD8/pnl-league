@@ -27,9 +27,9 @@ const en = {
   bOpenOkx: "Open my OKX account",
   bOkxUpdate: "Update my OKX status",
   okxAskAgain: "Where's your OKX account at now?",
-  okxCheck: "Opened your OKX account yet?
+  okxCheck: `Opened your OKX account yet?
 
-Tap below to update your status, so we know you're ready for registration on <b>1 Nov</b>.",
+Tap below to update your status, so we know you're ready for registration on <b>1 Nov</b>.`,
   okxNow: {
     verified: "Nice, you're ready for day one. Make sure you have at least 50 USDT to deposit when registration opens.",
     unverified: "Good start. Now complete identity verification (KYC) in the OKX app: Profile, then Verification. You need it to enter, and it can take a while.",
@@ -144,9 +144,9 @@ const ar = {
   bOpenOkx: "افتح حسابي على OKX",
   bOkxUpdate: "حدّث حالة حسابي على OKX",
   okxAskAgain: "ما وضع حسابك على OKX الآن؟",
-  okxCheck: "هل فتحت حسابك على OKX؟
+  okxCheck: `هل فتحت حسابك على OKX؟
 
-اضغط أدناه لتحديث حالتك، لنعرف أنك جاهز للتسجيل في <b>1 تشرين الثاني</b>.",
+اضغط أدناه لتحديث حالتك، لنعرف أنك جاهز للتسجيل في <b>1 تشرين الثاني</b>.`,
   okxNow: {
     verified: "ممتاز، أنت جاهز لليوم الأول. تأكّد أن لديك 50 USDT على الأقل للإيداع عند فتح التسجيل.",
     unverified: "بداية جيدة. أكمل الآن التحقق من الهوية (KYC) في تطبيق OKX: الملف الشخصي ثم التحقق. هو شرط للمشاركة وقد يستغرق بعض الوقت.",
