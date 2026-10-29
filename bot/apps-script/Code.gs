@@ -15,7 +15,7 @@ const CLICKS = "Clicks";
 const CCOLS = ["day", "ref", "event", "os", "count"];
 const CLICK_EVENTS = ["view", "tap_open", "auto_open", "tap_get_telegram", "tap_web", "left_page"];
 const UCOLS = ["tg_id", "username", "first_name", "last_name", "language_code", "lang", "name", "phone", "okx", "exp",
-  "eligible", "consent", "status", "step", "ref", "dup", "blocked", "deleted", "created", "updated", "no"];
+  "eligible", "consent", "status", "step", "ref", "dup", "blocked", "deleted", "created", "updated", "no", "nudged"];
 const BCOLS = ["id", "status", "kind", "payload", "admin_chat", "recipients", "cursor", "sent", "failed", "blocked", "created", "finished"];
 const FIRST_NO = 15; // first contender number handed out
 const SAVEABLE = ["username", "first_name", "last_name", "lang", "name", "phone", "okx", "exp", "eligible", "consent", "status", "step", "dup", "deleted", "blocked"];
@@ -118,8 +118,14 @@ function audience_(name, filter) {
   const base = name === "unfinished" ? isUnfinished_ : isRecipient_;
   const f = filter || {};
   const keys = Object.keys(f).filter(function (k) { return ["okx", "ref", "lang", "exp"].indexOf(k) >= 0 && Array.isArray(f[k]) && f[k].length; });
+  const after = Number(f.created_after) || 0; // new_only: people who arrived after the last nudge
   return function (u) {
     if (!base(u)) return false;
+    if (f.new_only) {
+      if (u.nudged) return false;
+      const c = u.created instanceof Date ? u.created.getTime() : Date.parse(u.created) || 0;
+      if (after && c && c <= after) return false; // existed (and was unfinished) when the last nudge went out
+    }
     return keys.every(function (k) { return f[k].indexOf(String(u[k] || "")) >= 0; });
   };
 }
@@ -202,6 +208,7 @@ function draftBroadcast_(payload) {
   const sh = sheet_(BROADCASTS, BCOLS);
   const audience = payload.audience === "unfinished" ? "unfinished" : "signed_up";
   const filter = payload.filter && typeof payload.filter === "object" ? payload.filter : null;
+  if (filter && filter.new_only) filter.created_after = lastNudgeAt_();
   const recipients = allRows_(sheet_(USERS, UCOLS)).filter(audience_(audience, filter)).length;
   const b = blank_(BCOLS);
   b.id = String(Date.now()); b.status = "draft"; b.kind = clip_(payload.kind, 20);
@@ -209,6 +216,15 @@ function draftBroadcast_(payload) {
   b.admin_chat = clip_(payload.admin_chat, 30); b.recipients = recipients; b.cursor = 2; b.sent = 0; b.failed = 0; b.blocked = 0; b.created = new Date();
   writeRow_(sh, sh.getLastRow() + 1, b, BCOLS);
   return { id: b.id, recipients: recipients };
+}
+
+// Time of the most recent nudge that actually went out (0 if none)
+function lastNudgeAt_() {
+  return allRows_(sheet_(BROADCASTS, BCOLS), BCOLS).reduce(function (m, b) {
+    if (b.kind !== "nudge" || ["queued", "sending", "done"].indexOf(b.status) < 0) return m;
+    const t = b.created instanceof Date ? b.created.getTime() : Date.parse(b.created) || 0;
+    return Math.max(m, t);
+  }, 0);
 }
 
 function sendBroadcast_(id) {
@@ -262,7 +278,7 @@ function processBroadcasts() {
         const bt = p.button && p.button[lang];
         if (bt) params.reply_markup = JSON.stringify({ inline_keyboard: [[bt.data ? { text: bt.text, callback_data: bt.data } : { text: bt.text, url: bt.url }]] });
         const res = tg_("sendMessage", params);
-        if (res.ok) b.sent = Number(b.sent) + 1;
+        if (res.ok) { b.sent = Number(b.sent) + 1; if (b.kind === "nudge") ush.getRange(cursor, UCOLS.indexOf("nudged") + 1).setValue(new Date()); }
         else if (res.error_code === 403) { b.blocked = Number(b.blocked) + 1; ush.getRange(cursor, UCOLS.indexOf("blocked") + 1).setValue("yes"); }
         else b.failed = Number(b.failed) + 1;
         Utilities.sleep(40); // stay under Telegram's ~30 msgs/sec

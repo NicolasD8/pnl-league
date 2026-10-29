@@ -136,7 +136,8 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         if (!cfg.OKX_SIGNUP_URL) { await tg.send(chat, "Set OKX_SIGNUP_URL in Vercel first (your OKX affiliate link), then redeploy."); return true; }
         payload = { kind: "okx", audience: "signed_up", filter: { okx: ["none", "unverified"] }, text: { en: t("en").okxNudge(cfg.OKX_SIGNUP_URL), ar: t("ar").okxNudge(cfg.OKX_SIGNUP_URL) }, button: { en: { text: t("en").bOpenOkx, url: cfg.OKX_SIGNUP_URL }, ar: { text: t("ar").bOpenOkx, url: cfg.OKX_SIGNUP_URL } } };
       } else if (cmd === "/nudge") {
-        payload = { kind: "nudge", audience: "unfinished", text: { en: t("en").nudge, ar: t("ar").nudge }, button: { en: { text: t("en").bResume, data: "resume" }, ar: { text: t("ar").bResume, data: "resume" } } };
+        const everyone = arg.toLowerCase() === "all";
+        payload = { kind: "nudge", audience: "unfinished", filter: everyone ? null : { new_only: true }, text: { en: t("en").nudge, ar: t("ar").nudge }, button: { en: { text: t("en").bResume, data: "resume" }, ar: { text: t("ar").bResume, data: "resume" } } };
       } else if (cmd === "/launch") {
         payload = { kind: "launch", text: { en: t("en").open, ar: t("ar").open }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
       } else {
@@ -144,7 +145,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         payload = { kind: "text", text: { en: esc(arg), ar: esc(arg) } };
       }
       const d = await db.draftBroadcast({ ...payload, admin_chat: String(chat) });
-      const who = payload.audience === "unfinished" ? "started but didn't finish signup" : payload.kind === "okx" || payload.kind === "okxcheck" ? "signed up, no OKX account or not verified" : "signed up, opted in";
+      const who = payload.audience === "unfinished" ? (payload.filter && payload.filter.new_only ? "didn't finish signup, never nudged before" : "didn't finish signup, INCLUDING people already nudged") : payload.kind === "okx" || payload.kind === "okxcheck" ? "signed up, no OKX account or not verified" : "signed up, opted in";
       await tg.send(chat, `<b>Preview</b> · goes to <b>${d.recipients}</b> people (${who}):`);
       const pb = payload.button && payload.button.en;
       await tg.send(chat, payload.text[row.lang === "ar" ? "ar" : "en"], pb ? { reply_markup: { inline_keyboard: [[pb.data ? btn(pb.text, pb.data) : url(pb.text, pb.url)]] } } : {});

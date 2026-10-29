@@ -39,7 +39,8 @@ const db = {
     const unfinished = (u) => u.status !== "complete" && u.status !== "ineligible" && u.consent !== "no" && u.deleted !== "yes";
     const base = p.audience === "unfinished" ? unfinished : (u) => u.status === "complete" && u.consent === "yes";
     const f = p.filter || {};
-    return { id, recipients: [...users.values()].filter((u) => base(u) && Object.keys(f).every((k) => f[k].includes(String(u[k] || "")))).length };
+    const keys = Object.keys(f).filter((k) => Array.isArray(f[k]));
+    return { id, recipients: [...users.values()].filter((u) => base(u) && (!f.new_only || !u.nudged) && keys.every((k) => f[k].includes(String(u[k] || "")))).length };
   },
   async sendBroadcast(id) { const b = broadcasts.get(id); if (b.status !== "draft") return { started: false, error: "status is " + b.status }; b.status = "queued"; return { started: true, recipients: 1 }; },
   async cancelBroadcast(id) { broadcasts.get(id).status = "cancelled"; return {}; },
@@ -132,9 +133,14 @@ const log = (label) => console.log("✓", label);
   // nudge: only people who started but didn't finish; button resumes at their step
   await msg(505, "/start lead1"); await tap(505, "lang:en"); await tap(505, "join"); await msg(505, "Half Way"); // now waiting on phone
   await msg(900, "/nudge");
-  assert.match(sent[sent.length - 3].text, /goes to <b>2<\/b> people \(started but didn't finish/); // user 505 + the admin, who never signed up; finished (101), opted-out (202) and ineligible (303) are excluded
+  assert.match(sent[sent.length - 3].text, /goes to <b>2<\/b> people \(didn't finish signup/); // user 505 + the admin, who never signed up; finished (101), opted-out (202) and ineligible (303) are excluded
   assert.match(sent[sent.length - 2].text, /one step away/); assert.deepStrictEqual(buttons(sent[sent.length - 2]), ["resume"]);
   assert.equal([...broadcasts.values()].pop().audience, "unfinished");
+  assert.deepStrictEqual([...broadcasts.values()].pop().filter, { new_only: true }, "/nudge skips people already nudged");
+  assert.match(sent[sent.length - 3].text, /never nudged before/);
+  users.get("505").nudged = "yes"; await msg(900, "/nudge"); assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people/, "already-nudged user excluded");
+  await msg(900, "/nudge all"); assert.equal([...broadcasts.values()].pop().filter, null); assert.match(sent[sent.length - 3].text, /INCLUDING people already nudged/);
+  users.get("505").nudged = "";
   await tap(505, "resume"); assert.match(last(505).text, /Share your phone number/);
   await tap(101, "resume"); assert.match(last(101).text, /You're on the list/);
   await msg(900, "/okx");
