@@ -142,6 +142,15 @@ const log = (label) => console.log("✓", label);
   assert.match(sent[sent.length - 2].text, /KYC-verified OKX account/); assert.ok(sent[sent.length - 2].text.includes(cfg.OKX_SIGNUP_URL), "link shown in text"); assert.deepStrictEqual(buttons(sent[sent.length - 2]), [cfg.OKX_SIGNUP_URL]);
   assert.deepStrictEqual([...broadcasts.values()].pop().filter, { okx: ["none", "unverified"] });
   log("/okx targets only signed-up people without a verified OKX account, with the affiliate button");
+
+  // people update their own OKX status (the bot can't see OKX)
+  await msg(101, "/start"); assert.ok(buttons(last(101)).includes("okxu"), "menu offers OKX update when not verified");
+  await tap(101, "okxu"); assert.match(last(101).text, /Where's your OKX account at now/);
+  await tap(101, "okxu:verified"); assert.equal(users.get("101").okx, "verified"); assert.match(last(101).text, /ready for day one/);
+  await msg(101, "/start"); assert.ok(!buttons(last(101)).includes("okxu"), "button gone once verified");
+  await tap(303, "okxu"); assert.ok(!/Where's your OKX/.test(last(303).text), "only signed-up users can update");
+  await tap(101, "okxu:none"); assert.equal(users.get("101").okx, "none"); assert.ok(last(101).text.includes(cfg.OKX_SIGNUP_URL));
+  log("'Update my OKX status': signed-up users update okx themselves; link shown if still none; button hides once verified");
   log("/nudge targets only unfinished signups; 'Finish my signup' resumes at the exact step; finished users just see the menu");
 
   // 7. stop / delete

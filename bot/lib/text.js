@@ -25,6 +25,14 @@ const en = {
   bBack: "← Menu",
   bRegister: "Register on OKX",
   bOpenOkx: "Open my OKX account",
+  bOkxUpdate: "Update my OKX status",
+  okxAskAgain: "Where's your OKX account at now?",
+  okxNow: {
+    verified: "Nice, you're ready for day one. Make sure you have at least 50 USDT to deposit when registration opens.",
+    unverified: "Good start. Now complete identity verification (KYC) in the OKX app: Profile, then Verification. You need it to enter, and it can take a while.",
+    none: (link) => link ? `No problem. Open your account here, then complete KYC in the OKX app:
+${link}` : "No problem. Open an OKX account and complete KYC before registration opens.",
+  },
   bInvite: "Invite a friend",
 
   how:
@@ -131,6 +139,14 @@ const ar = {
   bBack: "القائمة →",
   bRegister: "سجّل على OKX",
   bOpenOkx: "افتح حسابي على OKX",
+  bOkxUpdate: "حدّث حالة حسابي على OKX",
+  okxAskAgain: "ما وضع حسابك على OKX الآن؟",
+  okxNow: {
+    verified: "ممتاز، أنت جاهز لليوم الأول. تأكّد أن لديك 50 USDT على الأقل للإيداع عند فتح التسجيل.",
+    unverified: "بداية جيدة. أكمل الآن التحقق من الهوية (KYC) في تطبيق OKX: الملف الشخصي ثم التحقق. هو شرط للمشاركة وقد يستغرق بعض الوقت.",
+    none: (link) => link ? `لا مشكلة. افتح حسابك من هنا، ثم أكمل التحقق (KYC) في تطبيق OKX:
+${link}` : "لا مشكلة. افتح حسابًا على OKX وأكمل التحقق (KYC) قبل فتح التسجيل.",
+  },
   bInvite: "ادعُ صديقًا",
 
   how:

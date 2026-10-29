@@ -25,6 +25,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     const rows = [];
     if (isOpen()) rows.push([url(L.bRegister, cfg.OKX_CAMPAIGN_URL)]);
     else if (row.status !== "complete") rows.push([btn(L.bJoin, "join")]);
+    else if (row.okx !== "verified") rows.push([btn(L.bOkxUpdate, "okxu")]); // the bot can't see OKX, so let people tell us
     rows.push([btn(L.bHow, "m:how"), btn(L.bPrizes, "m:prizes")]);
     rows.push([btn(L.bRules, "m:rules"), btn(L.bAsk, "m:ask")]);
     rows.push([btn(L.bPrivacy, "m:privacy"), btn(L.bLang, row.lang === "ar" ? "lang:en" : "lang:ar")]);
@@ -244,6 +245,16 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       const body = { how: L.how, prizes: L.prizes, rules: L.rules, privacy: L.privacy }[val];
       if (body) return tg.send(chat, body, { reply_markup: val === "how" && row.status !== "complete" && !isOpen() ? { inline_keyboard: [[btn(L.bJoin, "join")], [btn(L.bBack, "m:home")]] } : back(L) });
       return;
+    }
+    if (kind === "okxu") {
+      if (row.status !== "complete") return home(chat, row);
+      if (!val) return tg.send(chat, L.okxAskAgain, { reply_markup: { inline_keyboard: [[btn(L.okx.verified, "okxu:verified")], [btn(L.okx.unverified, "okxu:unverified")], [btn(L.okx.none, "okxu:none")]] } });
+      if (!["verified", "unverified", "none"].includes(val)) return;
+      await tg.clearButtons(chat, q.message.message_id);
+      row = await db.save(row.tg_id, { okx: val });
+      const reply = val === "none" ? L.okxNow.none(esc(cfg.OKX_SIGNUP_URL || "")) : L.okxNow[val];
+      const kb = val !== "verified" && cfg.OKX_SIGNUP_URL ? [[url(L.bOpenOkx, cfg.OKX_SIGNUP_URL)], [btn(L.bBack, "m:home")]] : [[btn(L.bBack, "m:home")]];
+      return tg.send(chat, reply, { reply_markup: { inline_keyboard: kb } });
     }
     if (kind === "join" || kind === "resume") {
       if (isOpen() || row.status === "complete") return home(chat, row);
