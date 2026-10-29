@@ -47,7 +47,7 @@ for (const g of groups) {
   legend += `<rect x="540" y="${ly - 26}" width="22" height="22" fill="${g.fill}"/>
   <text x="578" y="${ly - 5}" font-family="${D}" font-weight="900" font-size="34" fill="${C.bone}">${g.label}</text>
   <text x="1016" y="${ly - 3}" font-family="${D}" font-weight="900" font-size="48" fill="${C.bone}" text-anchor="end">${g.n}<tspan font-size="24" fill="${C.ash}" dx="8">${pct(g.n, total)}%</tspan></text>
-  <text x="578" y="${ly + 24}" font-family="${M}" font-size="19" fill="${C.ash}">${esc(g.sub)}</text>
+  <text x="578" y="${ly + 24}" font-family="${M}" font-size="16" fill="${C.ash}">${esc(g.sub)}</text>
   <rect x="540" y="${ly + 44}" width="476" height="2" fill="${C.line}"/>`;
   ly += 94;
 }
