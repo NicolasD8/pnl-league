@@ -31,6 +31,7 @@ function doPost(e) {
       case "touch": return json_({ ok: true, row: touch_(body.user || {}, body.ref) });
       case "save": return json_({ ok: true, row: save_(String(body.id), body.fields || {}) });
       case "stats": return json_({ ok: true, stats: stats_() });
+      case "overview": return json_({ ok: true, overview: overview_() });
       case "draft_broadcast": return json_(Object.assign({ ok: true }, draftBroadcast_(body.payload || {})));
       case "send_broadcast": return json_(Object.assign({ ok: true }, sendBroadcast_(String(body.id))));
       case "cancel_broadcast": return json_(Object.assign({ ok: true }, setBroadcast_(String(body.id), { status: "cancelled" })));
@@ -135,6 +136,32 @@ function stats_() {
     }
   });
   return s;
+}
+
+// Everyone who ever opened the bot, as counts only (no personal data): stage, source, language, day.
+function overview_() {
+  const rows = allRows_(sheet_(USERS, UCOLS)).filter(function (u) { return u.tg_id; });
+  const o = { total: rows.length, stage: {}, by_source: {}, by_lang: {}, by_day: {}, okx_signed: {} };
+  const inc = function (obj, k, n) { obj[k] = (obj[k] || 0) + (n || 1); };
+  rows.forEach(function (u) {
+    let stage;
+    if (u.deleted === "yes") stage = "deleted";
+    else if (u.status === "complete") stage = "signed_up";
+    else if (u.status === "ineligible") stage = "ineligible";
+    else if (u.consent === "no") stage = "declined";
+    else if (u.step || u.name) stage = "mid_signup:" + (u.step || "name");
+    else stage = "opened_only";
+    if (u.blocked === "yes") inc(o.stage, "blocked_bot");
+    inc(o.stage, stage);
+    const src = u.ref || "(direct)";
+    o.by_source[src] = o.by_source[src] || { opened: 0, signed_up: 0 };
+    o.by_source[src].opened++;
+    if (stage === "signed_up") { o.by_source[src].signed_up++; inc(o.okx_signed, u.okx || "(blank)"); }
+    inc(o.by_lang, u.lang || "(not picked)");
+    const d = u.created instanceof Date ? Utilities.formatDate(u.created, "Asia/Beirut", "yyyy-MM-dd") : String(u.created || "").slice(0, 10);
+    if (d) { o.by_day[d] = o.by_day[d] || { opened: 0, signed_up: 0 }; o.by_day[d].opened++; if (stage === "signed_up") o.by_day[d].signed_up++; }
+  });
+  return o;
 }
 
 /* ---------------- broadcasts ---------------- */
