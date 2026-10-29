@@ -24,6 +24,7 @@ People tap a link (from an ad or a creator), the bot asks a few questions, and t
 | `/stats` | Signups, started vs finished, OKX status, language, and **signups per creator link**. |
 | `/broadcast your text` | Shows a preview and the recipient count, then sends to everyone who finished signup and said yes. It goes out in the background; you get a "done" message with sent / blocked / failed counts. |
 | `/launch` | The launch-day message in each person's language, with the **Register on OKX** button. Preview, then confirm. |
+| `/nudge` | Reminder to everyone who **started but didn't finish** signup (skips anyone who said no, was ineligible, deleted or blocked). Their **Finish my signup** button picks up at the exact question they stopped on. Preview, then confirm. |
 | Questions | Arrive in your private chat with the bot, tagged `#u123…`. **Reply to that message** to answer. |
 | `/whoami` | Shows your Telegram ID, which you need for `ADMIN_IDS`. Works for anyone. |
 

@@ -115,17 +115,21 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         `<b>Language</b> EN ${s.by_lang.en || 0} · AR ${s.by_lang.ar || 0}\n\n<b>By source</b>\n${top}`);
       return true;
     }
-    if (cmd === "/broadcast" || cmd === "/launch") {
+    if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/nudge") {
       let payload;
-      if (cmd === "/launch") {
+      if (cmd === "/nudge") {
+        payload = { kind: "nudge", audience: "unfinished", text: { en: t("en").nudge, ar: t("ar").nudge }, button: { en: { text: t("en").bResume, data: "resume" }, ar: { text: t("ar").bResume, data: "resume" } } };
+      } else if (cmd === "/launch") {
         payload = { kind: "launch", text: { en: t("en").open, ar: t("ar").open }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
       } else {
         if (!arg) { await tg.send(chat, "Usage: <code>/broadcast your message</code>\nSame text goes to everyone. For the launch-day message in both languages with the OKX button, use /launch."); return true; }
         payload = { kind: "text", text: { en: esc(arg), ar: esc(arg) } };
       }
       const d = await db.draftBroadcast({ ...payload, admin_chat: String(chat) });
-      await tg.send(chat, `<b>Preview</b> · goes to <b>${d.recipients}</b> people (signed up, opted in):`);
-      await tg.send(chat, payload.text[row.lang === "ar" ? "ar" : "en"], payload.button ? { reply_markup: { inline_keyboard: [[url(payload.button.en.text, payload.button.en.url)]] } } : {});
+      const who = payload.audience === "unfinished" ? "started but didn't finish signup" : "signed up, opted in";
+      await tg.send(chat, `<b>Preview</b> · goes to <b>${d.recipients}</b> people (${who}):`);
+      const pb = payload.button && payload.button.en;
+      await tg.send(chat, payload.text[row.lang === "ar" ? "ar" : "en"], pb ? { reply_markup: { inline_keyboard: [[pb.data ? btn(pb.text, pb.data) : url(pb.text, pb.url)]] } } : {});
       await tg.send(chat, "Send it?", { reply_markup: { inline_keyboard: [[btn(`Send to ${d.recipients}`, `bc:send:${d.id}`), btn("Cancel", `bc:cancel:${d.id}`)]] } });
       return true;
     }
@@ -238,10 +242,12 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       if (body) return tg.send(chat, body, { reply_markup: val === "how" && row.status !== "complete" && !isOpen() ? { inline_keyboard: [[btn(L.bJoin, "join")], [btn(L.bBack, "m:home")]] } : back(L) });
       return;
     }
-    if (kind === "join") {
+    if (kind === "join" || kind === "resume") {
       if (isOpen() || row.status === "complete") return home(chat, row);
       if (!row.lang) row = await db.save(row.tg_id, { lang: "en" });
-      return ask(chat, row, "name");
+      // "resume" (from /nudge) picks up at the question they stopped on
+      const at = kind === "resume" && ["name", "phone", "okx", "exp", "elig", "consent"].includes(row.step) ? row.step : "name";
+      return ask(chat, row, at);
     }
 
     // signup answers: only accept the one we're waiting for, so old buttons can't skip steps

@@ -34,7 +34,11 @@ const db = {
     const count = (k) => done.reduce((a, u) => ((a[u[k] || "(direct)"] = (a[u[k] || "(direct)"] || 0) + 1), a), {});
     return { complete: done.length, started: rows.filter((u) => u.name).length, stopped: rows.filter((u) => u.consent === "no").length, blocked: 0, by_ref: count("ref"), by_okx: count("okx"), by_lang: count("lang") };
   },
-  async draftBroadcast(p) { const id = String(broadcasts.size + 1); broadcasts.set(id, { ...p, status: "draft" }); return { id, recipients: [...users.values()].filter((u) => u.status === "complete" && u.consent === "yes").length }; },
+  async draftBroadcast(p) {
+    const id = String(broadcasts.size + 1); broadcasts.set(id, { ...p, status: "draft" });
+    const unfinished = (u) => u.status !== "complete" && u.status !== "ineligible" && u.consent !== "no" && u.deleted !== "yes";
+    return { id, recipients: [...users.values()].filter(p.audience === "unfinished" ? unfinished : (u) => u.status === "complete" && u.consent === "yes").length };
+  },
   async sendBroadcast(id) { const b = broadcasts.get(id); if (b.status !== "draft") return { started: false, error: "status is " + b.status }; b.status = "queued"; return { started: true, recipients: 1 }; },
   async cancelBroadcast(id) { broadcasts.get(id).status = "cancelled"; return {}; },
 };
@@ -122,6 +126,16 @@ const log = (label) => console.log("✓", label);
   await tap(900, `bc:send:${id}`); assert.match(last(900).text, /Not sent/);
   await msg(900, "/launch"); assert.equal(broadcasts.get("2").button.ar.url, cfg.OKX_CAMPAIGN_URL);
   log("admin /stats, /broadcast preview + confirm, double-send blocked, /launch has OKX button in both languages");
+
+  // nudge: only people who started but didn't finish; button resumes at their step
+  await msg(505, "/start lead1"); await tap(505, "lang:en"); await tap(505, "join"); await msg(505, "Half Way"); // now waiting on phone
+  await msg(900, "/nudge");
+  assert.match(sent[sent.length - 3].text, /goes to <b>2<\/b> people \(started but didn't finish/); // user 505 + the admin, who never signed up; finished (101), opted-out (202) and ineligible (303) are excluded
+  assert.match(sent[sent.length - 2].text, /one step away/); assert.deepStrictEqual(buttons(sent[sent.length - 2]), ["resume"]);
+  assert.equal([...broadcasts.values()].pop().audience, "unfinished");
+  await tap(505, "resume"); assert.match(last(505).text, /Share your phone number/);
+  await tap(101, "resume"); assert.match(last(101).text, /You're on the list/);
+  log("/nudge targets only unfinished signups; 'Finish my signup' resumes at the exact step; finished users just see the menu");
 
   // 7. stop / delete
   await msg(202, "/stop"); assert.equal(users.get("202").consent, "no");

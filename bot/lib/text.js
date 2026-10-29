@@ -84,6 +84,12 @@ Post it on your story, tag @pnlleague and challenge your rivals. The QR brings t
 
 #PNLLeague #MindOverMarket`,
   cardNotYet: "Your contender card unlocks when you join the early list.",
+  nudge: `You're one step away from the PNL League early list.
+
+Registration opens on OKX on <b>1 Nov</b>, and we'll send the link here to everyone on the list. You also get your contender card.
+
+Tap below to finish. It takes 20 seconds.`,
+  bResume: "Finish my signup",
 
   // questions
   askQ: "Type your question and someone from PNL League will reply here.",
@@ -177,6 +183,12 @@ const ar = {
 
 #PNLLeague #MindOverMarket`,
   cardNotYet: "تُفتح بطاقتك كمتنافس عند انضمامك إلى القائمة المبكرة.",
+  nudge: `تبقّت خطوة واحدة لتنضم إلى القائمة المبكرة لـ PNL League.
+
+يفتح التسجيل على OKX في <b>1 تشرين الثاني</b>، وسنرسل الرابط هنا لكل من على القائمة. وتحصل أيضًا على بطاقتك كمتنافس.
+
+اضغط أدناه لإكمال التسجيل. تستغرق 20 ثانية.`,
+  bResume: "أكمل تسجيلي",
 
   askQ: "اكتب سؤالك وسيردّ عليك أحد فريق PNL League هنا.",
   qSent: "وصلنا سؤالك. سنردّ عليك هنا في أقرب وقت.",

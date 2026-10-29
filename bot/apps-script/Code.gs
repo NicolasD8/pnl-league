@@ -104,6 +104,12 @@ function isRecipient_(u) {
   return u.status === "complete" && u.consent === "yes" && u.blocked !== "yes" && u.deleted !== "yes";
 }
 
+// Started the bot but never finished signup (and never said no, wasn't ineligible, didn't delete or block).
+function isUnfinished_(u) {
+  return u.tg_id && u.status !== "complete" && u.status !== "ineligible" && u.consent !== "no" && u.blocked !== "yes" && u.deleted !== "yes";
+}
+function audience_(name) { return name === "unfinished" ? isUnfinished_ : isRecipient_; }
+
 function stats_() {
   const rows = allRows_(sheet_(USERS, UCOLS));
   const s = { total: rows.length, started: 0, complete: 0, stopped: 0, blocked: 0, by_ref: {}, by_okx: {}, by_lang: {} };
@@ -126,10 +132,11 @@ function stats_() {
 
 function draftBroadcast_(payload) {
   const sh = sheet_(BROADCASTS, BCOLS);
-  const recipients = allRows_(sheet_(USERS, UCOLS)).filter(isRecipient_).length;
+  const audience = payload.audience === "unfinished" ? "unfinished" : "signed_up";
+  const recipients = allRows_(sheet_(USERS, UCOLS)).filter(audience_(audience)).length;
   const b = blank_(BCOLS);
   b.id = String(Date.now()); b.status = "draft"; b.kind = clip_(payload.kind, 20);
-  b.payload = JSON.stringify({ text: payload.text || {}, button: payload.button || null });
+  b.payload = JSON.stringify({ text: payload.text || {}, button: payload.button || null, audience: audience });
   b.admin_chat = clip_(payload.admin_chat, 30); b.recipients = recipients; b.cursor = 2; b.sent = 0; b.failed = 0; b.blocked = 0; b.created = new Date();
   writeRow_(sh, sh.getLastRow() + 1, b, BCOLS);
   return { id: b.id, recipients: recipients };
@@ -141,7 +148,7 @@ function sendBroadcast_(id) {
   if (!r) return { started: false, error: "not found" };
   const b = readRow_(sh, r, BCOLS);
   if (b.status !== "draft") return { started: false, error: "status is " + b.status };
-  b.status = "queued"; b.recipients = allRows_(sheet_(USERS, UCOLS)).filter(isRecipient_).length;
+  b.status = "queued"; b.recipients = allRows_(sheet_(USERS, UCOLS)).filter(audience_(JSON.parse(b.payload).audience)).length;
   writeRow_(sh, r, b, BCOLS);
   scheduleWorker_(1);
   return { started: true, recipients: b.recipients };
@@ -180,10 +187,11 @@ function processBroadcasts() {
     while (cursor <= last) {
       if (Date.now() - started > 4.5 * 60 * 1000) break;
       const u = users[cursor - 2];
-      if (isRecipient_(u)) {
+      if (audience_(p.audience)(u)) {
         const lang = u.lang === "ar" ? "ar" : "en";
         const params = { chat_id: u.tg_id, text: p.text[lang] || p.text.en, parse_mode: "HTML", disable_web_page_preview: true };
-        if (p.button && p.button[lang]) params.reply_markup = JSON.stringify({ inline_keyboard: [[{ text: p.button[lang].text, url: p.button[lang].url }]] });
+        const bt = p.button && p.button[lang];
+        if (bt) params.reply_markup = JSON.stringify({ inline_keyboard: [[bt.data ? { text: bt.text, callback_data: bt.data } : { text: bt.text, url: bt.url }]] });
         const res = tg_("sendMessage", params);
         if (res.ok) b.sent = Number(b.sent) + 1;
         else if (res.error_code === 403) { b.blocked = Number(b.blocked) + 1; ush.getRange(cursor, UCOLS.indexOf("blocked") + 1).setValue("yes"); }
