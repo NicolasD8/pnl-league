@@ -3,7 +3,7 @@
 const { sheet } = require("../lib/clients");
 const env = require("../lib/env");
 
-const EVENTS = ["view", "tap_open", "auto_open", "tap_get_telegram", "tap_web", "left_page"];
+const EVENTS = ["view", "tap_open", "auto_open", "tap_get_telegram", "tap_web", "left_page", "fallback_web"];
 const REF_RE = /^[a-z0-9_-]{0,40}$/;
 const BOT_UA = /facebookexternalhit|facebot|bot|crawler|spider|preview|slurp/i;
 

@@ -1,6 +1,6 @@
 // Vercel function: ad bridge page. Ads point to https://<app>/go/<tag> (e.g. /go/lead3).
 // Inside Instagram/Facebook, a plain t.me link opens a web page that most people never get past.
-// This page jumps straight into the Telegram app where the phone allows it, shows one big button where it doesn't,
+// This page shows one big "Open in Telegram" button that opens the app on tap (the only thing in-app browsers reliably allow),
 // helps people who don't have Telegram, and counts each step (via /api/track) so the ad funnel is visible.
 const fs = require("fs");
 const path = require("path");
@@ -114,13 +114,17 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
   function left(){ track("left_page"); }
   track("view");
   document.addEventListener("visibilitychange",function(){ if(document.hidden) left(); });
-  document.getElementById("open").addEventListener("click",function(){ track("tap_open"); ${pixel ? 'try{fbq("trackCustom","OpenTelegram",{ref:ref})}catch(e){}' : ""} });
+  document.getElementById("open").addEventListener("click",function(ev){
+    track("tap_open"); ${pixel ? 'try{fbq("trackCustom","OpenTelegram",{ref:ref})}catch(e){}' : ""}
+    // iPhone: try the app (allowed on a tap); if it didn't open within ~1.2s, fall back to the normal t.me link
+    if(os==="ios"){ ev.preventDefault(); window.location.href=${JSON.stringify(tgUrl)};
+      setTimeout(function(){ if(!document.hidden){ track("fallback_web"); window.location.href=${JSON.stringify(web)}; } },1200); }
+  });
   document.getElementById("get").addEventListener("click",function(){ track("tap_get_telegram"); });
   document.getElementById("web").addEventListener("click",function(){ track("tap_web"); });
-  // try the app straight away (works on most Android in-app browsers; iOS usually needs the tap)
-  if(os!=="desktop"){ setTimeout(function(){ track("auto_open"); window.location.href=document.getElementById("open").href; },350); }
-  // still here after 2.5s? the app probably didn't open: highlight the "no Telegram" help
-  setTimeout(function(){ if(!document.hidden) document.getElementById("help").className="help hot"; },2500);
+  // No automatic jump: in-app browsers (Instagram/Facebook) block app links without a tap and some show an error page instead.
+  // highlight the "no Telegram" help a little later, so the big button stays the obvious first step
+  setTimeout(function(){ if(!document.hidden) document.getElementById("help").className="help hot"; },6000);
 })();
 </script>
 </body>
