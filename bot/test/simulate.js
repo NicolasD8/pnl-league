@@ -169,6 +169,28 @@ const log = (label) => console.log("✓", label);
   await tap(404, "join"); assert.match(last(404).text, /Registration is open/);
   log("after REG_OPENS: welcome switches to 'Registration is open' + OKX button, signup closed");
 
+  // ad bridge page (/go/<tag>)
+  const go = require("../api/go");
+  const render = (ref, ua, q = {}) => { let out = { code: 0, body: "", h: {} }; go({ query: { ref, ...q }, headers: { "user-agent": ua } }, { setHeader: (k, v) => (out.h[k] = v), status: (c) => ({ send: (b) => { out.code = c; out.body = b; } }) }); return out; };
+  process.env.BOT_USERNAME = "PNLLeagueBot";
+  const and = render("Lead3", "Mozilla/5.0 (Linux; Android 14) Instagram 300.0");
+  assert.equal(and.code, 200); assert.match(and.body, /intent:\/\/resolve\?domain=PNLLeagueBot&amp;start=lead3#Intent;scheme=tg;package=org.telegram.messenger/);
+  assert.match(and.body, /play\.google\.com\/store\/apps\/details\?id=org\.telegram\.messenger/);
+  const ios = render("lead3", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0) Instagram");
+  assert.match(ios.body, /href="tg:\/\/resolve\?domain=PNLLeagueBot&amp;start=lead3"/); assert.match(ios.body, /apps\.apple\.com/);
+  const desk = render("lead3", "Mozilla/5.0 (Windows NT 10.0)");
+  assert.match(desk.body, /href="https:\/\/t\.me\/PNLLeagueBot\?start=lead3"/);
+  const evil = render("<script>", "Mozilla/5.0 (Android)");
+  assert.ok(!evil.body.includes("<script>alert") && /domain=PNLLeagueBot#Intent/.test(evil.body), "bad tag dropped, plain bot link used");
+  assert.match(render("lead3", "x", { lang: "ar" }).body, /dir="rtl"/);
+  log("/go bridge page: Android intent link, iPhone tg:// link, desktop t.me link, store links, bad tags dropped, Arabic version");
+
+  // /stats shows the ad funnel once the page has traffic
+  const realStats = db.stats; db.stats = async () => ({ ...(await realStats()), clicks: { lead3: { view: 120, tap_open: 45, tap_get_telegram: 9 } }, opened_by_ref: { lead3: 30 }, by_ref: { lead3: 12 } });
+  await msg(900, "/stats"); assert.match(last(900).text, /lead3: 120 views → 45 taps → 30 in bot → 12 signed · 9 needed Telegram/);
+  db.stats = realStats;
+  log("/stats adds the ad-page funnel per tag");
+
   // 9. Apps Script phone normaliser
   const gs = fs.readFileSync(path.join(__dirname, "../apps-script/Code.gs"), "utf8");
   const fn = new Function(gs.replace(/\r\n/g, "\n").match(/function normalisePhone_[\s\S]*?\n}\n/)[0] + "; return normalisePhone_;")();

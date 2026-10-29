@@ -103,6 +103,18 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     }
   }
 
+  // Bridge-page funnel per tag: page views -> tapped Open -> opened the bot -> signed up
+  function adFunnel(s) {
+    const c = s.clicks || {};
+    const tags = Object.keys(c).filter((k) => (c[k].view || 0) > 0).sort((a, b) => (c[b].view || 0) - (c[a].view || 0));
+    if (!tags.length) return "";
+    const lines = tags.slice(0, 10).map((k) => {
+      const v = c[k], opened = (s.opened_by_ref || {})[k] || 0, signed = (s.by_ref || {})[k] || 0;
+      return `${esc(k)}: ${v.view || 0} views → ${v.tap_open || 0} taps → ${opened} in bot → ${signed} signed${v.tap_get_telegram ? ` · ${v.tap_get_telegram} needed Telegram` : ""}`;
+    });
+    return `\n\n<b>Ad page (/go)</b>\n${lines.join("\n")}`;
+  }
+
   /* ---------- admin ---------- */
   async function adminCommand(chat, from, cmd, arg, row) {
     if (cmd === "/whoami") { await tg.send(chat, `Your Telegram ID: <code>${from.id}</code>\nThis chat ID: <code>${chat}</code>`); return true; }
@@ -113,7 +125,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       await tg.send(chat,
         `<b>Early list</b>\nSigned up: <b>${s.complete}</b> (started: ${s.started})\nOpted out / blocked: ${s.stopped} / ${s.blocked}\n\n` +
         `<b>OKX</b> verified ${s.by_okx.verified || 0} · not verified ${s.by_okx.unverified || 0} · none ${s.by_okx.none || 0}\n` +
-        `<b>Language</b> EN ${s.by_lang.en || 0} · AR ${s.by_lang.ar || 0}\n\n<b>By source</b>\n${top}`);
+        `<b>Language</b> EN ${s.by_lang.en || 0} · AR ${s.by_lang.ar || 0}\n\n<b>By source</b>\n${top}` + adFunnel(s));
       return true;
     }
     if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/nudge" || cmd === "/okx" || cmd === "/okxcheck") {

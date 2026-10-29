@@ -11,6 +11,9 @@
 
 const USERS = "Users";
 const BROADCASTS = "Broadcasts";
+const CLICKS = "Clicks";
+const CCOLS = ["day", "ref", "event", "os", "count"];
+const CLICK_EVENTS = ["view", "tap_open", "auto_open", "tap_get_telegram", "tap_web", "left_page"];
 const UCOLS = ["tg_id", "username", "first_name", "last_name", "language_code", "lang", "name", "phone", "okx", "exp",
   "eligible", "consent", "status", "step", "ref", "dup", "blocked", "deleted", "created", "updated", "no"];
 const BCOLS = ["id", "status", "kind", "payload", "admin_chat", "recipients", "cursor", "sent", "failed", "blocked", "created", "finished"];
@@ -32,6 +35,7 @@ function doPost(e) {
       case "save": return json_({ ok: true, row: save_(String(body.id), body.fields || {}) });
       case "stats": return json_({ ok: true, stats: stats_() });
       case "overview": return json_({ ok: true, overview: overview_() });
+      case "track": return json_(Object.assign({ ok: true }, track_(body.ref, body.event, body.os)));
       case "draft_broadcast": return json_(Object.assign({ ok: true }, draftBroadcast_(body.payload || {})));
       case "send_broadcast": return json_(Object.assign({ ok: true }, sendBroadcast_(String(body.id))));
       case "cancel_broadcast": return json_(Object.assign({ ok: true }, setBroadcast_(String(body.id), { status: "cancelled" })));
@@ -122,8 +126,9 @@ function audience_(name, filter) {
 
 function stats_() {
   const rows = allRows_(sheet_(USERS, UCOLS));
-  const s = { total: rows.length, started: 0, complete: 0, stopped: 0, blocked: 0, by_ref: {}, by_okx: {}, by_lang: {} };
+  const s = { total: rows.length, started: 0, complete: 0, stopped: 0, blocked: 0, by_ref: {}, by_okx: {}, by_lang: {}, opened_by_ref: {}, clicks: clickTotals_() };
   rows.forEach(function (u) {
+    if (u.tg_id) { const o = u.ref || "(direct)"; s.opened_by_ref[o] = (s.opened_by_ref[o] || 0) + 1; }
     if (u.name || u.status) s.started++;
     if (u.consent === "no") s.stopped++;
     if (u.blocked === "yes") s.blocked++;
@@ -136,6 +141,33 @@ function stats_() {
     }
   });
   return s;
+}
+
+// Bridge-page step counter: one row per day + ref + event + os, with a running count. No personal data.
+function track_(ref, event, os) {
+  ref = String(ref || "").toLowerCase(); event = String(event || ""); os = String(os || "other");
+  if (!/^[a-z0-9_-]{0,40}$/.test(ref) || CLICK_EVENTS.indexOf(event) < 0) return { counted: false };
+  const sh = sheet_(CLICKS, CCOLS);
+  const day = Utilities.formatDate(new Date(), "Asia/Beirut", "yyyy-MM-dd");
+  const key = [day, ref || "(direct)", event, os].join("|");
+  const rows = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, CCOLS.length).getValues() : [];
+  for (let i = 0; i < rows.length; i++) {
+    const d = rows[i][0] instanceof Date ? Utilities.formatDate(rows[i][0], "Asia/Beirut", "yyyy-MM-dd") : String(rows[i][0]);
+    if ([d, rows[i][1], rows[i][2], rows[i][3]].join("|") === key) { sh.getRange(i + 2, 5).setValue(Number(rows[i][4] || 0) + 1); return { counted: true }; }
+  }
+  sh.appendRow(["'" + day, ref || "(direct)", event, os, 1]);
+  return { counted: true };
+}
+
+function clickTotals_() {
+  const sh = sheet_(CLICKS, CCOLS), out = {};
+  if (sh.getLastRow() < 2) return out;
+  sh.getRange(2, 1, sh.getLastRow() - 1, CCOLS.length).getValues().forEach(function (r) {
+    const ref = String(r[1] || "(direct)"), ev = String(r[2]);
+    out[ref] = out[ref] || {};
+    out[ref][ev] = (out[ref][ev] || 0) + (Number(r[4]) || 0);
+  });
+  return out;
 }
 
 // Everyone who ever opened the bot, as counts only (no personal data): stage, source, language, day.

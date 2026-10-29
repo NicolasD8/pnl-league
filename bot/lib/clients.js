@@ -53,6 +53,7 @@ function sheet(url, secret, fetchImpl = fetch) {
     touch: (user, ref) => call("touch", { user, ref }).then((j) => j.row),
     save: (id, fields) => call("save", { id: String(id), fields }).then((j) => j.row),
     stats: () => call("stats").then((j) => j.stats),
+    track: (ref, event, os) => call("track", { ref, event, os }),
     draftBroadcast: (payload) => call("draft_broadcast", { payload }).then((j) => j),
     sendBroadcast: (id) => call("send_broadcast", { id }).then((j) => j),
     cancelBroadcast: (id) => call("cancel_broadcast", { id }).then((j) => j),
