@@ -21,7 +21,7 @@ const midN = mid.reduce((a, [, n]) => a + n, 0);
 const STEP = { name: "name", phone: "phone", okx: "OKX", exp: "style", elig: "18+", consent: "consent", question: "question" };
 const groups = [
   { label: "SIGNED UP", sub: "Finished the early-list signup", n: st.signed_up || 0, fill: C.green },
-  { label: "MID-SIGNUP", sub: "Stopped at " + (mid.sort((a, b) => b[1] - a[1]).map(([k, n]) => `${STEP[k.split(":")[1]] || k.split(":")[1]} ${n}`).join(" · ") || "-"), n: midN, fill: C.bone },
+  { label: "MID-SIGNUP", sub: "At: " + (mid.sort((a, b) => b[1] - a[1]).map(([k, n]) => `${STEP[k.split(":")[1]] || k.split(":")[1]} ${n}`).join(" · ") || "-"), n: midN, fill: C.bone },
   { label: "ONLY OPENED", sub: "Never tapped Join", n: st.opened_only || 0, fill: C.ash },
   { label: "DROPPED OUT", sub: `Ineligible ${st.ineligible || 0} · said no ${st.declined || 0} · deleted ${st.deleted || 0}`, n: (st.ineligible || 0) + (st.declined || 0) + (st.deleted || 0), fill: C.slate },
 ];
