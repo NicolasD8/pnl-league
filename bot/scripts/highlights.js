@@ -112,6 +112,7 @@ const FAQ = [
   { kicker: "I already have OKX", title: "Good. Check two things.", bullets: ["It's KYC verified", "It's your main account, not a sub-account"], body: ["Some existing accounts need to be linked to the competition before they count. Send /ask in the bot and we check yours."] },
   { kicker: "How do I make the Finals?", title: "Climb two leaderboards", body: ["!PnL and Trading Volume, updated live every 5 minutes.", "Your rewards from both boards are added up. The 12 highest totals go to the Live Finals."] },
   { kicker: "What can I win?", title: "Two separate rewards", stats: [{ v: "5,000", l: "USDT prize pool", s: "12 finalists" }, { v: "1,000", l: "USDT rewards", s: "Online League bonus" }], body: ["The 1,000 USDT leaderboard rewards are a trading bonus during the Online League. They're not part of the prize pool."] },
+  { kicker: "How can I watch?", title: "Watch it live", stats: [{ v: "1-7 NOV", l: "Phase 1 online", s: "stories + reels", size: 110 }, { v: "23 NOV", l: "Live Finals", s: "tentative", size: 110 }], body: ["!Phase 1: follow the race all week on @pnlleague stories and reels.", "Live Finals: livestreamed on TikTok and Instagram, or come watch at VCore Tabarja on the day."] },
   { kicker: "How do I join?", title: "Two taps in Telegram", bullets: ["Open @PNLLeagueBot", "Tell us your OKX status", "Confirm, and you're on the early list"], body: ["!We send you the OKX registration link the moment it opens on 1 Nov."], cta: "t.me/PNLLeagueBot" },
 ];
 
