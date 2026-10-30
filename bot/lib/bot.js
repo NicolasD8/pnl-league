@@ -69,6 +69,22 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     if (step === "consent") {
       return tg.send(chat, L.askConsent, { reply_markup: { inline_keyboard: [[btn(L.bConsentYes, "consent:yes")], [btn(L.no, "consent:no")]] } });
     }
+    if (step === "confirm") {
+      return tg.send(chat, L.askConfirm(esc(firstName(row))), { reply_markup: { inline_keyboard: [[btn(L.bConfirm, "cf:yes")], [btn(L.bNotEligible, "cf:no")]] } });
+    }
+  }
+
+  // Signup is two taps: OKX status, then one confirmation (18+, Lebanon, OK with messages).
+  // The name comes from the Telegram profile (/name changes it); phone is optional after signup.
+  // Also where anyone stuck at an old step (name/phone/style/...) gets picked up.
+  const tgName = (row) => [row.first_name, row.last_name].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 80);
+  async function startSignup(chat, row) {
+    if (isOpen() || row.status === "complete") return home(chat, row);
+    if (!row.lang) row = await db.save(row.tg_id, { lang: "en" });
+    if (!row.name && tgName(row).length >= 2) row = await db.save(row.tg_id, { name: tgName(row) });
+    if (!row.name) return ask(chat, row, "name"); // no usable Telegram name: ask once
+    if (!["verified", "unverified", "none"].includes(row.okx)) return ask(chat, row, "okx");
+    return ask(chat, row, "confirm");
   }
 
   async function finish(chat, row) {
@@ -81,8 +97,9 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     const kb = [];
     if (row.okx !== "verified" && cfg.OKX_SIGNUP_URL) kb.push([url(L.bOpenOkx, cfg.OKX_SIGNUP_URL)]);
     kb.push([url(L.bInvite, share)]);
+    if (!row.phone) kb.push([btn(L.bAddPhone, "addphone")]);
     kb.push([btn(L.bBack, "m:home")]);
-    await tg.send(chat, L.done(esc(firstName(row)), kyc), { reply_markup: { inline_keyboard: kb } });
+    await tg.send(chat, L.done(esc(firstName(row)), kyc) + "\n\n<i>" + L.nameHint + "</i>", { reply_markup: { inline_keyboard: kb } });
     await sendCard(chat, row);
   }
 
@@ -190,10 +207,12 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       if (row.deleted === "yes" || row.consent === "no") row = await db.save(row.tg_id, { deleted: "", consent: "" });
       if (!row.lang) return tg.send(chat, L.pickLang, { reply_markup: { inline_keyboard: [[btn("English", "lang:en"), btn("العربية", "lang:ar")]] } });
       if (row.step) row = await db.save(row.tg_id, { step: "" });
-      return home(chat, row);
+      await home(chat, row);
+      return isOpen() || row.status === "complete" ? undefined : startSignup(chat, row); // no extra "Join" tap
     }
     if (cmd === "/menu" || cmd === "/help") return home(chat, row);
-    if (cmd === "/join") return row.status === "complete" ? home(chat, row) : ask(chat, row, "name");
+    if (cmd === "/join") return startSignup(chat, row);
+    if (cmd === "/name") return ask(chat, row, "name");
     if (cmd === "/language") return tg.send(chat, L.pickLang, { reply_markup: { inline_keyboard: [[btn("English", "lang:en"), btn("العربية", "lang:ar")]] } });
     if (cmd === "/stop") { await db.save(row.tg_id, { consent: "no", step: "" }); return tg.send(chat, L.stopped, { reply_markup: { remove_keyboard: true } }); }
     if (cmd === "/delete") {
@@ -211,17 +230,23 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     if (row.step === "name" && text && !cmd) {
       const name = text.replace(/\s+/g, " ").slice(0, 80);
       if (name.length < 3 || !/\p{L}/u.test(name)) return tg.send(chat, L.badName);
-      row = await db.save(row.tg_id, { name });
-      return ask(chat, row, "phone");
+      row = await db.save(row.tg_id, { name, step: "" });
+      if (row.status === "complete") { await tg.send(chat, L.nameUpdated, { reply_markup: { remove_keyboard: true } }); return sendCard(chat, row); }
+      return startSignup(chat, row);
     }
     if (row.step === "phone") {
       if (msg.contact) {
         if (msg.contact.user_id && msg.contact.user_id !== from.id) return tg.send(chat, L.notOwnContact);
-        await db.save(row.tg_id, { phone: "+" + String(msg.contact.phone_number).replace(/\D/g, "") }); // Telegram sends it without the +
+        row = await db.save(row.tg_id, { phone: "+" + String(msg.contact.phone_number).replace(/\D/g, ""), step: "" }); // Telegram sends it without the +
+        if (row.status === "complete") return tg.send(chat, L.phoneThanks, { reply_markup: { remove_keyboard: true } });
         await tg.send(chat, "✓", { reply_markup: { remove_keyboard: true } });
-        return ask(chat, row, "okx");
+        return startSignup(chat, row);
       }
-      if (text && !cmd) { await tg.send(chat, "✓", { reply_markup: { remove_keyboard: true } }); return ask(chat, row, "okx"); } // "Skip" or anything else
+      if (text && !cmd) { // "Skip" or anything else
+        row = await db.save(row.tg_id, { step: "" });
+        await tg.send(chat, "✓", { reply_markup: { remove_keyboard: true } });
+        return row.status === "complete" ? home(chat, row) : startSignup(chat, row);
+      }
     }
     if (row.step === "question" && text && !cmd) {
       await db.save(row.tg_id, { step: "" });
@@ -229,7 +254,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       await tg.send(adminChat, `❓ <b>Question</b> from ${who} · ${row.lang === "ar" ? "AR" : "EN"} · #u${from.id}\n\n${esc(text)}\n\n<i>Reply to this message to answer.</i>`);
       return tg.send(chat, L.qSent, { reply_markup: menu(L, row) });
     }
-    if (["okx", "exp", "elig", "consent"].includes(row.step)) return tg.send(chat, L.useTypeHint);
+    if (["okx", "exp", "elig", "consent", "confirm"].includes(row.step)) return tg.send(chat, L.useTypeHint);
     return home(chat, row);
   }
 
@@ -252,7 +277,8 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       row = await db.save(row.tg_id, { lang: val === "ar" ? "ar" : "en" });
       await tg.clearButtons(chat, q.message.message_id);
       if (!first) await tg.send(chat, t(row.lang).langSet);
-      return home(chat, row);
+      await home(chat, row);
+      return first ? startSignup(chat, row) : undefined;
     }
     const L = t(row.lang);
     if (kind === "m") {
@@ -273,22 +299,30 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       return tg.send(chat, reply, { reply_markup: { inline_keyboard: kb } });
     }
     if (kind === "join" || kind === "resume") {
-      if (isOpen() || row.status === "complete") return home(chat, row);
-      if (!row.lang) row = await db.save(row.tg_id, { lang: "en" });
-      // "resume" (from /nudge) picks up at the question they stopped on
-      const at = kind === "resume" && ["name", "phone", "okx", "exp", "elig", "consent"].includes(row.step) ? row.step : "name";
-      return ask(chat, row, at);
+      return startSignup(chat, row); // also picks up anyone who stopped at an old step
+    }
+    if (kind === "addphone") {
+      if (row.phone) return home(chat, row);
+      return ask(chat, row, "phone");
+    }
+    if (kind === "cf") {
+      if (row.status === "complete" || isOpen()) return home(chat, row);
+      if (row.step !== "confirm") return startSignup(chat, row); // stale button
+      await tg.clearButtons(chat, q.message.message_id);
+      if (val !== "yes") { await db.save(row.tg_id, { consent: "no", step: "" }); return tg.send(chat, L.cfNo); }
+      return finish(chat, row);
     }
 
     // signup answers: only accept the one we're waiting for, so old buttons can't skip steps
     if (kind !== row.step) return;
     await tg.clearButtons(chat, q.message.message_id);
-    if (kind === "okx" && ["verified", "unverified", "none"].includes(val)) { row = await db.save(row.tg_id, { okx: val }); return ask(chat, row, "exp"); }
-    if (kind === "exp") { row = await db.save(row.tg_id, { exp: ["futures", "spot", "both", "new"].includes(val) ? val : "" }); return ask(chat, row, "elig"); }
+    if (kind === "okx" && ["verified", "unverified", "none"].includes(val)) { row = await db.save(row.tg_id, { okx: val }); return startSignup(chat, row); }
+    // buttons left over from the old, longer flow
+    if (kind === "exp") { row = await db.save(row.tg_id, { exp: ["futures", "spot", "both", "new"].includes(val) ? val : "" }); return startSignup(chat, row); }
     if (kind === "elig") {
       if (val !== "yes") { await db.save(row.tg_id, { eligible: "no", step: "", status: "ineligible" }); return tg.send(chat, L.inelig); }
       row = await db.save(row.tg_id, { eligible: "yes" });
-      return ask(chat, row, "consent");
+      return startSignup(chat, row);
     }
     if (kind === "consent") {
       if (val !== "yes") { await db.save(row.tg_id, { consent: "no", step: "" }); return tg.send(chat, L.noConsent); }

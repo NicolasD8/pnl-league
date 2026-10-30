@@ -63,7 +63,15 @@ ${link}` : "No problem. Open an OKX account and complete KYC before registration
     `/stop: stop all messages\n/delete: delete your details`,
 
   // signup
-  askName: "What's your full name?",
+  askName: "What name should go on your contender card?",
+  askConfirm: (name) => `Last step${name ? ", " + name : ""}. Tap below to confirm you're <b>18 or older</b>, <b>based in Lebanon</b>, and OK with PNL League messaging you here about the competition. No spam, and you can send /stop any time.`,
+  bConfirm: "Yes, count me in",
+  bNotEligible: "No",
+  cfNo: "No problem. PNL League is open to traders 18 or older based in Lebanon, and we can only send you the registration link if you're OK with messages here. Send /start if anything changes.",
+  bAddPhone: "Add my WhatsApp number (optional)",
+  phoneThanks: "Saved. We may also reach you on WhatsApp about the competition.",
+  nameUpdated: "Name updated. Here's your new card.",
+  nameHint: "Wrong name on your card? Send /name to change it.",
   badName: "That doesn't look like a full name. Type your first and last name.",
   askPhone: "Share your phone number so we can also reach you on WhatsApp. Tap the button below, or skip.",
   bShare: "Share my number",
@@ -179,7 +187,15 @@ ${link}` : "لا مشكلة. افتح حسابًا على OKX وأكمل الت�
     `نستخدم بياناتك فقط لإرسال تحديثات PNL League لك هنا. لا نبيعها ولا نشاركها.\n\n` +
     `/stop: إيقاف كل الرسائل\n/delete: حذف بياناتك`,
 
-  askName: "ما اسمك الكامل؟",
+  askName: "ما الاسم الذي تريده على بطاقتك كمتنافس؟",
+  askConfirm: (name) => `الخطوة الأخيرة${name ? " يا " + name : ""}. اضغط أدناه لتؤكّد أن عمرك <b>18 سنة أو أكثر</b>، وأنك <b>تقيم في لبنان</b>، وأنك توافق على أن تراسلك PNL League هنا بخصوص المسابقة. بدون رسائل مزعجة، ويمكنك إرسال /stop في أي وقت.`,
+  bConfirm: "نعم، سجّلني",
+  bNotEligible: "لا",
+  cfNo: "لا مشكلة. PNL League مفتوحة لمن هم بعمر 18 سنة وما فوق ومقيمين في لبنان، ولا يمكننا إرسال رابط التسجيل إلا إذا وافقت على الرسائل هنا. أرسل /start إذا تغيّر أي شيء.",
+  bAddPhone: "أضف رقم واتساب (اختياري)",
+  phoneThanks: "تم الحفظ. قد نتواصل معك أيضًا على واتساب بخصوص المسابقة.",
+  nameUpdated: "تم تحديث الاسم. إليك بطاقتك الجديدة.",
+  nameHint: "الاسم على بطاقتك غير صحيح؟ أرسل /name لتغييره.",
   badName: "لا يبدو هذا اسمًا كاملًا. اكتب اسمك الأول واسم العائلة.",
   askPhone: "شارك رقم هاتفك لنتمكّن من التواصل معك على واتساب أيضًا. اضغط الزر أدناه، أو تخطَّ.",
   bShare: "شارك رقمي",

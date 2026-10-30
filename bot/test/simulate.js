@@ -61,56 +61,68 @@ const buttons = (s) => (s.kb && s.kb.inline_keyboard ? s.kb.inline_keyboard.flat
 const log = (label) => console.log("✓", label);
 
 (async () => {
-  // 1. creator link + language
+  // 1. creator link + language, then signup starts by itself (no "Join" tap)
   await msg(101, "/start rami");
   assert.match(last(101).text, /Choose your language/); assert.equal(users.get("101").ref, "rami");
   await tap(101, "lang:en");
-  assert.match(last(101).text, /Registration opens on OKX in <b>6d 1h<\/b>/); assert.ok(buttons(last(101)).includes("join"));
-  log("ref captured from /start rami, language picker, countdown in welcome");
+  assert.match(sent[sent.length - 2].text, /Registration opens on OKX in <b>6d 1h<\/b>/);
+  assert.match(last(101).text, /Do you have an OKX account/, "first question appears right after the welcome");
+  assert.equal(users.get("101").name, "Test Trader", "name taken from the Telegram profile");
+  log("ref captured from /start rami, language picker, countdown, signup starts without a Join tap, name from Telegram");
 
-  // 2. full signup
-  await tap(101, "join");
-  assert.equal(last(101).text, "What's your full name?"); assert.equal(last(101).kb.keyboard[0][0].text, "Test Trader");
-  await msg(101, "x"); assert.match(last(101).text, /doesn't look like a full name/);
-  await msg(101, "Test Trader");
-  assert.match(last(101).text, /Share your phone number/); assert.equal(last(101).kb.keyboard[0][0].request_contact, true);
-  await msg(101, "", { contact: { phone_number: "96171234567", user_id: 999 } }); assert.match(last(101).text, /your own number/);
-  await msg(101, "", { contact: { phone_number: "96171234567", user_id: 101 } });
-  assert.equal(users.get("101").phone, "+96171234567");
+  // 2. two-tap signup
+  await tap(101, "cf:yes"); assert.equal(users.get("101").status, "", "stale confirm button can't skip the OKX question");
   assert.match(last(101).text, /Do you have an OKX account/);
-  await tap(101, "consent:yes"); assert.equal(users.get("101").status, "", "out-of-order button must be ignored");
   await tap(101, "okx:unverified");
-  await tap(101, "exp:futures");
-  await tap(101, "elig:yes");
-  await tap(101, "consent:yes");
+  assert.match(last(101).text, /Last step, Test\. Tap below to confirm you're <b>18 or older<\/b>/); assert.deepStrictEqual(buttons(last(101)), ["cf:yes", "cf:no"]);
+  await tap(101, "cf:yes");
   const cardMsg = last(101);
   assert.ok(cardMsg.photo && cardMsg.photo.length > 20000, "contender card PNG sent"); assert.match(cardMsg.text, /#0015/);
   assert.deepStrictEqual([...cardMsg.photo.slice(0, 4)], [0x89, 0x50, 0x4e, 0x47], "is a PNG");
   const done = sent[sent.length - 2];
-  assert.match(done.text, /You're in, Test/); assert.match(done.text, /KYC verified now/);
+  assert.match(done.text, /You're in, Test/); assert.match(done.text, /KYC verified now/); assert.match(done.text, /Send \/name to change it/);
   assert.ok(buttons(done).includes(cfg.OKX_SIGNUP_URL), "affiliate button for unverified");
+  assert.ok(buttons(done).includes("addphone"), "optional phone offered after signup");
   assert.ok(buttons(done).some((u) => u && u.includes("t.me/share/url") && decodeURIComponent(u).includes("t.me/PNLLeagueBot?start=rami")), "invite carries ref");
-  assert.equal(users.get("101").status, "complete");
-  log("signup: name validation, own-contact check, stale buttons ignored, done screen with affiliate + invite link");
-  log("contender card: real PNG rendered and sent after signup, numbered #0015 (first number)");
+  const u101 = users.get("101");
+  assert.equal(u101.status, "complete"); assert.equal(u101.consent, "yes"); assert.equal(u101.eligible, "yes");
+  log("signup in 2 taps: OKX status, then one confirm (18+, Lebanon, messages); stale buttons ignored; done screen + card #0015");
+
+  // optional phone after signup, and renaming
+  await tap(101, "addphone"); assert.equal(last(101).kb.keyboard[0][0].request_contact, true);
+  await msg(101, "", { contact: { phone_number: "96171234567", user_id: 999 } }); assert.match(last(101).text, /your own number/);
+  await msg(101, "", { contact: { phone_number: "96171234567", user_id: 101 } });
+  assert.equal(users.get("101").phone, "+96171234567"); assert.match(last(101).text, /may also reach you on WhatsApp/);
+  await msg(101, "/name"); assert.match(last(101).text, /What name should go on your contender card/);
+  await msg(101, "x"); assert.match(last(101).text, /doesn't look like a full name/);
+  await msg(101, "Karim Test"); assert.equal(users.get("101").name, "Karim Test"); assert.ok(last(101).photo, "new card after rename"); assert.match(sent[sent.length - 2].text, /Name updated/);
+  log("optional WhatsApp number after signup (own number only), /name renames and resends the card");
 
   // 3. returning user
-  await msg(101, "/start"); assert.match(last(101).text, /You're on the list, <b>Test<\/b>/); assert.ok(!buttons(last(101)).includes("join"));
-  log("returning user sees 'You're on the list', no join button");
+  await msg(101, "/start"); assert.match(last(101).text, /You're on the list, <b>Karim<\/b>/); assert.ok(!buttons(last(101)).includes("join"));
+  log("returning user sees 'You're on the list', no join button, no signup questions");
 
-  // 4. Arabic user, verified, ineligible path and consent refusal
+  // 4. Arabic user with an Arabic name, verified; declining path
   await msg(202, "/start"); await tap(202, "lang:ar");
-  assert.match(last(202).text, /أول بطولة تداول مباشرة/);
-  await tap(202, "join"); await msg(202, "سارة خوري"); await msg(202, "تخطَّ");
-  await tap(202, "okx:verified"); await tap(202, "exp:"); await tap(202, "elig:yes"); await tap(202, "consent:yes");
+  assert.match(sent[sent.length - 2].text, /أول بطولة تداول مباشرة/); assert.match(last(202).text, /حساب على OKX/);
+  await msg(202, "/name"); await msg(202, "سارة خوري"); assert.match(last(202).text, /حساب على OKX/, "rename mid-signup continues the signup");
+  await tap(202, "okx:verified"); assert.match(last(202).text, /الخطوة الأخيرة يا سارة/);
+  await tap(202, "cf:yes");
   assert.match(sent[sent.length - 2].text, /أنت معنا يا سارة/); assert.ok(!buttons(sent[sent.length - 2]).includes(cfg.OKX_SIGNUP_URL), "no affiliate button for verified");
   assert.match(last(202).text, /#0016/); assert.ok(last(202).photo, "Arabic card sent");
   await msg(303, "/card"); assert.match(last(303).text, /unlocks when you join/);
   await msg(101, "/card"); assert.ok(last(101).photo && /#0015/.test(last(101).text), "/card resends same number");
-  await msg(303, "/start"); await tap(303, "lang:en"); await tap(303, "join"); await msg(303, "Minor Person"); await msg(303, "Skip");
-  await tap(303, "okx:none"); await tap(303, "exp:new"); await tap(303, "elig:no");
-  assert.match(last(303).text, /open to traders 18 or older/); assert.equal(users.get("303").status, "ineligible");
-  log("Arabic signup, verified users get no affiliate button, under-18/outside-Lebanon path");
+  await msg(303, "/start"); await tap(303, "lang:en"); await tap(303, "okx:none"); await tap(303, "cf:no");
+  assert.match(last(303).text, /open to traders 18 or older based in Lebanon/); assert.equal(users.get("303").consent, "no"); assert.notEqual(users.get("303").status, "complete");
+  log("Arabic signup with Arabic name, verified users get no affiliate button, 'No' on the confirm ends signup politely");
+
+  // people stuck at a step of the OLD flow get carried into the new one
+  users.set("606", { tg_id: "606", lang: "en", step: "exp", status: "", ref: "", consent: "", deleted: "", name: "Old Flow", okx: "none", first_name: "Old", last_name: "Flow" });
+  await tap(606, "resume"); assert.match(last(606).text, /Last step, Old/, "stuck at old 'trading style' step -> straight to the confirm");
+  users.set("607", { tg_id: "607", lang: "en", step: "name", status: "", ref: "", consent: "", deleted: "", name: "", okx: "", first_name: "New", last_name: "Person" });
+  await tap(607, "resume"); assert.equal(users.get("607").name, "Test Trader", "name filled from the live Telegram profile"); assert.match(last(607).text, /Do you have an OKX account/);
+  users.delete("606"); users.delete("607");
+  log("anyone stuck at an old step (name, phone, style...) resumes into the 2-tap flow");
 
   // 5. FAQ + question to admins + admin reply
   await tap(101, "m:prizes"); assert.match(last(101).text, /5,000 USDT prize pool/); assert.match(last(101).text, /1,000 USDT in leaderboard rewards/);
@@ -132,7 +144,7 @@ const log = (label) => console.log("✓", label);
   log("admin /stats, /broadcast preview + confirm, double-send blocked, /launch has OKX button in both languages");
 
   // nudge: only people who started but didn't finish; button resumes at their step
-  await msg(505, "/start lead1"); await tap(505, "lang:en"); await tap(505, "join"); await msg(505, "Half Way"); // now waiting on phone
+  await msg(505, "/start lead1"); await tap(505, "lang:en"); // now waiting on the OKX question
   await msg(900, "/nudge");
   assert.match(sent[sent.length - 3].text, /goes to <b>2<\/b> people \(didn't finish signup/); // user 505 + the admin, who never signed up; finished (101), opted-out (202) and ineligible (303) are excluded
   assert.match(sent[sent.length - 2].text, /one step away/); assert.deepStrictEqual(buttons(sent[sent.length - 2]), ["resume"]);
@@ -142,7 +154,7 @@ const log = (label) => console.log("✓", label);
   users.get("505").nudged = "yes"; await msg(900, "/nudge"); assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people/, "already-nudged user excluded");
   await msg(900, "/nudge all"); assert.equal([...broadcasts.values()].pop().filter, null); assert.match(sent[sent.length - 3].text, /INCLUDING people already nudged/);
   users.get("505").nudged = "";
-  await tap(505, "resume"); assert.match(last(505).text, /Share your phone number/);
+  await tap(505, "resume"); assert.match(last(505).text, /Do you have an OKX account/);
   await tap(101, "resume"); assert.match(last(101).text, /You're on the list/);
   await msg(900, "/okx");
   assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people \(signed up, no OKX account or not verified, never got this message before\)/); // 101 unverified yes; 202 verified (and opted out) no
