@@ -109,10 +109,15 @@ Registration opens on OKX on <b>1 Nov</b>, and we'll send the link here to every
 
 Tap below to finish. It takes 20 seconds.`,
   bResume: "Finish my signup",
-  okxNudge: (link) => `One thing before registration opens on 1 Nov: you need a <b>KYC-verified OKX account</b> to compete.
+  okxNudge: (link) => `<b>⚠️ Action needed to secure your spot</b>
 
-Verification can take a while, so start now. Open your account with this link, then complete identity verification in the OKX app:
-${link}
+Registration opens on OKX on <b>Sunday 1 Nov</b>, and Phase 1 only runs <b>7 days (1–7 Nov)</b>. Without a <b>KYC-verified OKX account</b> you can't register, and every day you wait is a day off the leaderboard.
+
+<b>Do it now:</b>
+1. Open your OKX account: ${link}
+2. Complete identity verification (KYC) in the OKX app
+
+Only <b>12 seats</b> at the Live Finals. Be ready on day one.
 
 <i>18+. KYC required. Trading involves risk.</i>`,
 
@@ -233,10 +238,15 @@ ${link}` : "لا مشكلة. افتح حسابًا على OKX وأكمل الت�
 
 اضغط أدناه لإكمال التسجيل. تستغرق 20 ثانية.`,
   bResume: "أكمل تسجيلي",
-  okxNudge: (link) => `أمر واحد قبل فتح التسجيل في 1 تشرين الثاني: تحتاج إلى <b>حساب OKX موثّق (KYC)</b> لتشارك.
+  okxNudge: (link) => `<b>⚠️ خطوة ضرورية لتضمن مكانك</b>
 
-قد يستغرق التحقق بعض الوقت، لذا ابدأ الآن. افتح حسابك عبر هذا الرابط، ثم أكمل التحقق من الهوية في تطبيق OKX:
-${link}
+يفتح التسجيل على OKX <b>يوم الأحد 1 تشرين الثاني</b>، والمرحلة الأولى تستمر <b>7 أيام فقط (1–7 تشرين الثاني)</b>. بدون <b>حساب OKX موثّق (KYC)</b> لا يمكنك التسجيل، وكل يوم تتأخر فيه هو يوم خارج لوحة الصدارة.
+
+<b>قم بذلك الآن:</b>
+1. افتح حسابك على OKX: ${link}
+2. أكمل التحقق من الهوية (KYC) في تطبيق OKX
+
+<b>12 مقعدًا فقط</b> في النهائيات المباشرة. كن جاهزًا من اليوم الأول.
 
 <i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
 
