@@ -40,7 +40,8 @@ const db = {
     const base = p.audience === "unfinished" ? unfinished : (u) => u.status === "complete" && u.consent === "yes";
     const f = p.filter || {};
     const keys = Object.keys(f).filter((k) => Array.isArray(f[k]));
-    return { id, recipients: [...users.values()].filter((u) => base(u) && (!f.new_only || !u.nudged) && keys.every((k) => f[k].includes(String(u[k] || "")))).length };
+    const fresh = (u) => !f.new_only || (p.kind === "nudge" ? !u.nudged : !String(u.got || "").split(",").includes(p.kind));
+    return { id, recipients: [...users.values()].filter((u) => base(u) && fresh(u) && keys.every((k) => f[k].includes(String(u[k] || "")))).length };
   },
   async sendBroadcast(id) { const b = broadcasts.get(id); if (b.status !== "draft") return { started: false, error: "status is " + b.status }; b.status = "queued"; return { started: true, recipients: 1 }; },
   async cancelBroadcast(id) { broadcasts.get(id).status = "cancelled"; return {}; },
@@ -144,10 +145,13 @@ const log = (label) => console.log("✓", label);
   await tap(505, "resume"); assert.match(last(505).text, /Share your phone number/);
   await tap(101, "resume"); assert.match(last(101).text, /You're on the list/);
   await msg(900, "/okx");
-  assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people \(signed up, no OKX account or not verified\)/); // 101 unverified yes; 202 verified (and opted out) no
+  assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people \(signed up, no OKX account or not verified, never got this message before\)/); // 101 unverified yes; 202 verified (and opted out) no
   assert.match(sent[sent.length - 2].text, /KYC-verified OKX account/); assert.ok(sent[sent.length - 2].text.includes(cfg.OKX_SIGNUP_URL), "link shown in text"); assert.deepStrictEqual(buttons(sent[sent.length - 2]), [cfg.OKX_SIGNUP_URL]);
-  assert.deepStrictEqual([...broadcasts.values()].pop().filter, { okx: ["none", "unverified"] });
-  log("/okx targets only signed-up people without a verified OKX account, with the affiliate button");
+  assert.deepStrictEqual([...broadcasts.values()].pop().filter, { okx: ["none", "unverified"], new_only: true });
+  assert.match(sent[sent.length - 3].text, /never got this message before/);
+  users.get("101").got = "okx"; await msg(900, "/okx"); assert.match(sent[sent.length - 3].text, /goes to <b>0<\/b> people/, "already-received excluded");
+  await msg(900, "/okx all"); assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people .*INCLUDING/); users.get("101").got = "";
+  log("/okx targets only signed-up people without a verified OKX account, once per person (/okx all to resend)");
 
   // people update their own OKX status (the bot can't see OKX)
   await msg(101, "/start"); assert.ok(buttons(last(101)).includes("okxu"), "menu offers OKX update when not verified");
@@ -157,8 +161,8 @@ const log = (label) => console.log("✓", label);
   await tap(303, "okxu"); assert.ok(!/Where's your OKX/.test(last(303).text), "only signed-up users can update");
   await tap(101, "okxu:none"); assert.equal(users.get("101").okx, "none"); assert.ok(last(101).text.includes(cfg.OKX_SIGNUP_URL));
   await msg(900, "/okxcheck");
-  assert.match(sent[sent.length - 3].text, /\(signed up, no OKX account or not verified\)/);
-  assert.deepStrictEqual(buttons(sent[sent.length - 2]), ["okxu"]); assert.deepStrictEqual([...broadcasts.values()].pop().filter, { okx: ["none", "unverified"] });
+  assert.match(sent[sent.length - 3].text, /\(signed up, no OKX account or not verified, never got this message before\)/);
+  assert.deepStrictEqual(buttons(sent[sent.length - 2]), ["okxu"]); assert.deepStrictEqual([...broadcasts.values()].pop().filter, { okx: ["none", "unverified"], new_only: true });
   log("/okxcheck asks only non-verified signups to update their OKX status (one-tap button)");
   log("'Update my OKX status': signed-up users update okx themselves; link shown if still none; button hides once verified");
   log("/nudge targets only unfinished signups; 'Finish my signup' resumes at the exact step; finished users just see the menu");
