@@ -21,7 +21,12 @@ const midN = mid.reduce((a, [, n]) => a + n, 0);
 const STEP = { name: "name", phone: "phone", okx: "OKX", exp: "style", elig: "18+", consent: "consent", question: "question" };
 const groups = [
   { label: "SIGNED UP", sub: "Finished the early-list signup", n: st.signed_up || 0, fill: C.green },
-  { label: "MID-SIGNUP", sub: "At: " + (mid.sort((a, b) => b[1] - a[1]).map(([k, n]) => `${STEP[k.split(":")[1]] || k.split(":")[1]} ${n}`).join(" · ") || "-"), n: midN, fill: C.bone },
+  { label: "MID-SIGNUP", sub: (() => {
+      const top = mid.sort((a, b) => b[1] - a[1]);
+      const shown = top.slice(0, 3).map(([k, n]) => `${STEP[k.split(":")[1]] || k.split(":")[1]} ${n}`);
+      const rest = top.slice(3).reduce((a, [, n]) => a + n, 0);
+      return "At: " + (shown.join(" · ") || "-") + (rest ? ` · other ${rest}` : "");
+    })(), n: midN, fill: C.bone },
   { label: "ONLY OPENED", sub: "Never tapped Join", n: st.opened_only || 0, fill: C.ash },
   { label: "DROPPED OUT", sub: `Ineligible ${st.ineligible || 0} · said no ${st.declined || 0} · deleted ${st.deleted || 0}`, n: (st.ineligible || 0) + (st.declined || 0) + (st.deleted || 0), fill: C.slate },
 ];
@@ -54,30 +59,30 @@ for (const g of groups) {
 const blockedNote = st.blocked_bot ? `<text x="540" y="${ly - 4}" font-family="${M}" font-size="19" fill="${C.dim}">${st.blocked_bot} of these later blocked the bot</text>` : "";
 
 /* ---------- by source (opened vs signed up, one scale) ---------- */
-const src = { rich: { opened: 0, signed_up: 0 }, raw: { opened: 0, signed_up: 0 }, ads: { opened: 0, signed_up: 0 } };
+const src = { rich: { opened: 0, signed_up: 0 }, rami: { opened: 0, signed_up: 0 }, raw: { opened: 0, signed_up: 0 }, ads: { opened: 0, signed_up: 0 } };
 for (const [ref, v] of Object.entries(o.by_source || {})) {
-  const k = ref === "rich" ? "rich" : /^(lead|awareness)/i.test(ref) ? "ads" : "raw";
+  const k = ref === "rich" ? "rich" : ref === "rami" ? "rami" : /^(lead|awareness)/i.test(ref) ? "ads" : "raw";
   src[k].opened += v.opened; src[k].signed_up += v.signed_up;
 }
-const rowsSrc = [["RICH", src.rich], ["RAW", src.raw], ["ADS", src.ads]];
+const rowsSrc = [["RICH", src.rich], ["RAMI", src.rami], ["RAW", src.raw], ["ADS", src.ads]];
 const maxOpen = Math.max(1, ...rowsSrc.map(([, v]) => v.opened));
 const bx = 200, bw = 520;
-let srcSvg = "", sy = 905;
+let srcSvg = "", sy = 896;
 for (const [label, v] of rowsSrc) {
   const wo = Math.max(4, Math.round((v.opened / maxOpen) * bw)), ws = Math.round((v.signed_up / maxOpen) * bw);
-  srcSvg += `<text x="64" y="${sy + 27}" font-family="${D}" font-weight="900" font-size="32" fill="${C.bone}">${label}</text>
-  <rect x="${bx}" y="${sy}" width="${wo}" height="36" fill="${C.slate}"/>
-  ${ws ? `<rect x="${bx}" y="${sy}" width="${ws}" height="36" fill="${C.green}"/>` : ""}
-  <text x="${bx + wo + 12}" y="${sy + 27}" font-family="${D}" font-weight="900" font-size="30" fill="${C.bone}">${v.signed_up} of ${v.opened}</text>
-  <text x="1016" y="${sy + 27}" font-family="${M}" font-size="20" fill="${C.ash}" text-anchor="end">${pct(v.signed_up, v.opened)}% signed</text>`;
-  sy += 54;
+  srcSvg += `<text x="64" y="${sy + 25}" font-family="${D}" font-weight="900" font-size="30" fill="${C.bone}">${label}</text>
+  <rect x="${bx}" y="${sy}" width="${wo}" height="32" fill="${C.slate}"/>
+  ${ws ? `<rect x="${bx}" y="${sy}" width="${ws}" height="32" fill="${C.green}"/>` : ""}
+  <text x="${bx + wo + 12}" y="${sy + 25}" font-family="${D}" font-weight="900" font-size="30" fill="${C.bone}">${v.signed_up} of ${v.opened}</text>
+  <text x="1016" y="${sy + 25}" font-family="${M}" font-size="20" fill="${C.ash}" text-anchor="end">${pct(v.signed_up, v.opened)}% signed</text>`;
+  sy += 46;
 }
 
 /* ---------- per day ---------- */
 const days = Object.entries(o.by_day || {}).sort(([x], [y]) => (x < y ? -1 : 1)).slice(-7);
 const maxDay = Math.max(1, ...days.map(([, v]) => v.opened));
 const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-const chartH = 84, base = 1236, colW = Math.min(110, Math.floor(952 / Math.max(1, days.length)) - 24);
+const chartH = 70, base = 1240, colW = Math.min(110, Math.floor(952 / Math.max(1, days.length)) - 24);
 let daySvg = "";
 days.forEach(([d, v], i) => {
   const x = 64 + i * (colW + 24);
@@ -111,8 +116,8 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" 
   <rect x="756" y="854" width="18" height="18" fill="${C.slate}"/><text x="782" y="870" font-family="${M}" font-size="19" fill="${C.ash}">opened, not signed</text>
   ${srcSvg}
 
-  <rect x="64" y="1068" width="952" height="2" fill="${C.line}"/>
-  <text x="64" y="1104" font-family="${D}" font-weight="700" font-size="28" letter-spacing="7" fill="${C.ash}">NEW PEOPLE PER DAY</text>
+  <rect x="64" y="1086" width="952" height="2" fill="${C.line}"/>
+  <text x="64" y="1120" font-family="${D}" font-weight="700" font-size="28" letter-spacing="7" fill="${C.ash}">NEW PEOPLE PER DAY</text>
   ${daySvg}
 
   <text x="64" y="1300" font-family="${M}" font-size="17" fill="${C.dim}">Source: @PNLLeagueBot · ${esc(stamp || "")} · PNL League by CE · Presented by OKX</text>
