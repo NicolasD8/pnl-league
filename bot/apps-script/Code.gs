@@ -27,6 +27,11 @@ function doPost(e) {
   try { body = JSON.parse(e.postData.contents); } catch (err) { return json_({ ok: false, error: "bad json" }); }
   const expected = prop_("SHEET_SECRET"), got = String(body.secret || "").trim();
   if (!expected || got !== expected) return json_({ ok: false, error: "unauthorised (secret lengths: sheet " + expected.length + ", request " + got.length + ")" });
+  // Click counts are append-only and never take the lock, so ad traffic can't make the bot wait.
+  if (body.action === "track") {
+    try { return json_(Object.assign({ ok: true }, track_(body.ref, body.event, body.os))); }
+    catch (err) { return json_({ ok: false, error: String(err && err.message || err) }); }
+  }
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
@@ -158,12 +163,7 @@ function track_(ref, event, os) {
   if (!/^[a-z0-9_-]{0,40}$/.test(ref) || CLICK_EVENTS.indexOf(event) < 0) return { counted: false };
   const sh = sheet_(CLICKS, CCOLS);
   const day = Utilities.formatDate(new Date(), "Asia/Beirut", "yyyy-MM-dd");
-  const key = [day, ref || "(direct)", event, os].join("|");
-  const rows = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, CCOLS.length).getValues() : [];
-  for (let i = 0; i < rows.length; i++) {
-    const d = rows[i][0] instanceof Date ? Utilities.formatDate(rows[i][0], "Asia/Beirut", "yyyy-MM-dd") : String(rows[i][0]);
-    if ([d, rows[i][1], rows[i][2], rows[i][3]].join("|") === key) { sh.getRange(i + 2, 5).setValue(Number(rows[i][4] || 0) + 1); return { counted: true }; }
-  }
+  // One row per event (count 1). Totals add the count column, so old summed rows and new rows mix fine.
   sh.appendRow(["'" + day, ref || "(direct)", event, os, 1]);
   return { counted: true };
 }

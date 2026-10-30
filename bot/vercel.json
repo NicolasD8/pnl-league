@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": { "api/*.js": { "maxDuration": 30, "includeFiles": "assets/**" } },
+  "functions": { "api/*.js": { "maxDuration": 60, "includeFiles": "assets/**" } },
   "rewrites": [
     { "source": "/go/:ref", "destination": "/api/go?ref=:ref" },
     { "source": "/go", "destination": "/api/go" }
