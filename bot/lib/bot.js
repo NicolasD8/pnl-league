@@ -60,6 +60,12 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     if (step === "okx") {
       return tg.send(chat, L.askOkx, { reply_markup: { inline_keyboard: [[btn(L.okx.verified, "okx:verified")], [btn(L.okx.unverified, "okx:unverified")], [btn(L.okx.none, "okx:none")]] } });
     }
+    if (step === "okxgo") { // no account / not verified: point them at the affiliate link before they can confirm
+      const kb = row.okx === "none"
+        ? [[url(L.bCreateOkx, cfg.OKX_SIGNUP_URL)], [btn(L.bOkxCreated, "og:created")]]
+        : [[url(L.bOpenOkx, cfg.OKX_SIGNUP_URL)], [btn(L.bOkxVerifiedNow, "og:verified")], [btn(L.bOkxLater, "og:later")]];
+      return tg.send(chat, L.okxGo[row.okx === "none" ? "none" : "unverified"], { reply_markup: { inline_keyboard: kb } });
+    }
     if (step === "exp") {
       return tg.send(chat, L.askExp, { reply_markup: { inline_keyboard: [[btn(L.exp.futures, "exp:futures"), btn(L.exp.spot, "exp:spot")], [btn(L.exp.both, "exp:both"), btn(L.exp.new, "exp:new")], [btn(L.exp.skip, "exp:")]] } });
     }
@@ -75,6 +81,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
   }
 
   // Signup is two taps: OKX status, then one confirmation (18+, Lebanon, OK with messages).
+  // No account / not verified adds one stop in between: the affiliate link, before they can confirm.
   // The name comes from the Telegram profile (/name changes it); phone is optional after signup.
   // Also where anyone stuck at an old step (name/phone/style/...) gets picked up.
   const tgName = (row) => [row.first_name, row.last_name].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 80);
@@ -84,6 +91,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     if (!row.name && tgName(row).length >= 2) row = await db.save(row.tg_id, { name: tgName(row) });
     if (!row.name) return ask(chat, row, "name"); // no usable Telegram name: ask once
     if (!["verified", "unverified", "none"].includes(row.okx)) return ask(chat, row, "okx");
+    if (row.okx !== "verified" && cfg.OKX_SIGNUP_URL) return ask(chat, row, "okxgo");
     return ask(chat, row, "confirm");
   }
 
@@ -254,7 +262,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       await tg.send(adminChat, `❓ <b>Question</b> from ${who} · ${row.lang === "ar" ? "AR" : "EN"} · #u${from.id}\n\n${esc(text)}\n\n<i>Reply to this message to answer.</i>`);
       return tg.send(chat, L.qSent, { reply_markup: menu(L, row) });
     }
-    if (["okx", "exp", "elig", "consent", "confirm"].includes(row.step)) return tg.send(chat, L.useTypeHint);
+    if (["okx", "okxgo", "exp", "elig", "consent", "confirm"].includes(row.step)) return tg.send(chat, L.useTypeHint);
     return home(chat, row);
   }
 
@@ -311,6 +319,14 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       await tg.clearButtons(chat, q.message.message_id);
       if (val !== "yes") { await db.save(row.tg_id, { consent: "no", step: "" }); return tg.send(chat, L.cfNo); }
       return finish(chat, row);
+    }
+    if (kind === "og") {
+      if (row.status === "complete" || isOpen()) return home(chat, row);
+      if (row.step !== "okxgo") return startSignup(chat, row); // stale button
+      await tg.clearButtons(chat, q.message.message_id);
+      if (val === "created") row = await db.save(row.tg_id, { okx: "unverified" }); // account made, KYC still to do
+      if (val === "verified") row = await db.save(row.tg_id, { okx: "verified" });
+      return ask(chat, row, "confirm");
     }
 
     // signup answers: only accept the one we're waiting for, so old buttons can't skip steps

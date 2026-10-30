@@ -97,6 +97,14 @@ ${link}` : "No problem. Open an OKX account and complete KYC before registration
   kycDone: "Your account's verified, so you're ready. Make sure you have at least 50 USDT to deposit when it opens.",
   inviteText: "PNL League is Lebanon's first live trading championship. The top 12 trade live at VCore for a 5,000 USDT prize pool. Join the early list:",
   useTypeHint: "Tap a button above to answer.",
+  okxGo: {
+    none: "One thing before you're in: <b>create your OKX account with the PNL League link below</b>, then come back here and tap ✅.",
+    unverified: "One thing before you're in: <b>finish identity verification (KYC) on OKX</b>. You need it to enter, and it can take a while. Open OKX below, then come back here.",
+  },
+  bCreateOkx: "Create my OKX account",
+  bOkxCreated: "✅ I've created my account",
+  bOkxVerifiedNow: "✅ Done, I'm verified",
+  bOkxLater: "I'll finish it before 1 Nov",
   cardCaption: (no) => `<b>Your contender card${no ? " · #" + String(no).padStart(4, "0") : ""}</b>
 
 Post it on your story, tag @pnlleague and challenge your rivals. The QR brings them straight here.
@@ -226,6 +234,14 @@ ${link}` : "لا مشكلة. افتح حسابًا على OKX وأكمل الت�
   kycDone: "حسابك موثّق، أنت جاهز. تأكّد أن لديك 50 USDT على الأقل للإيداع عند فتح التسجيل.",
   inviteText: "PNL League أول بطولة تداول مباشرة في لبنان. أفضل 12 يتداولون مباشرةً في VCore على مجموع جوائز بقيمة 5,000 USDT. انضم إلى القائمة المبكرة:",
   useTypeHint: "اضغط أحد الأزرار أعلاه للإجابة.",
+  okxGo: {
+    none: "خطوة واحدة قبل أن تنضمّ: <b>أنشئ حسابك على OKX عبر رابط PNL League أدناه</b>، ثم عُد إلى هنا واضغط ✅.",
+    unverified: "خطوة واحدة قبل أن تنضمّ: <b>أكمل توثيق الهوية (KYC) على OKX</b>. هو شرط للمشاركة وقد يستغرق بعض الوقت. افتح OKX أدناه ثم عُد إلى هنا.",
+  },
+  bCreateOkx: "أنشئ حسابي على OKX",
+  bOkxCreated: "✅ أنشأت حسابي",
+  bOkxVerifiedNow: "✅ تمّ، حسابي موثّق",
+  bOkxLater: "سأكمله قبل 1 نوفمبر",
   cardCaption: (no) => `<b>بطاقتك كمتنافس${no ? " · #" + String(no).padStart(4, "0") : ""}</b>
 
 انشرها على الستوري، أشِر إلى @pnlleague وتحدَّ منافسيك. رمز QR يوصلهم مباشرةً إلى هنا.
