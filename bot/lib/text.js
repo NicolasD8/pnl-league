@@ -117,7 +117,7 @@ Registration opens on OKX on <b>Sunday 1 Nov</b>, and Phase 1 only runs <b>7 day
 1. Open your OKX account: ${link}
 2. Complete identity verification (KYC) in the OKX app
 
-Only <b>12 seats</b> at the Live Finals. Be ready on day one.
+Be ready on day one.
 
 <i>18+. KYC required. Trading involves risk.</i>`,
 
@@ -246,7 +246,7 @@ ${link}` : "لا مشكلة. افتح حسابًا على OKX وأكمل الت�
 1. افتح حسابك على OKX: ${link}
 2. أكمل التحقق من الهوية (KYC) في تطبيق OKX
 
-<b>12 مقعدًا فقط</b> في النهائيات المباشرة. كن جاهزًا من اليوم الأول.
+كن جاهزًا من اليوم الأول.
 
 <i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
 
