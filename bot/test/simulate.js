@@ -10,7 +10,7 @@ const tg = {
   send: async (chat, text, extra = {}) => { sent.push({ chat: String(chat), text, kb: extra.reply_markup }); return { message_id: sent.length }; },
   answer: async () => {},
   clearButtons: async () => {},
-  call: async (method, p = {}) => { if (method === "sendVideo") sent.push({ chat: String(p.chat_id), video: p.video, text: p.caption || "", kb: p.reply_markup }); return {}; },
+  call: async (method, p = {}) => { if (method === "sendVideo" || method === "sendPhoto") sent.push({ chat: String(p.chat_id), video: p.video, image: p.photo, text: p.caption || "", kb: p.reply_markup }); return {}; },
   sendPhoto: async (chat, png, extra = {}) => { sent.push({ chat: String(chat), photo: png, text: extra.caption || "", kb: extra.reply_markup }); return {}; },
 };
 const users = new Map();
@@ -149,7 +149,11 @@ const log = (label) => console.log("✓", label);
   assert.match(sent[sent.length - 2].text, /&lt;b&gt;now&lt;\/b&gt;/, "admin text is escaped");
   await tap(900, `bc:send:${id}`); assert.match(last(900).text, /Sending to/); assert.equal(broadcasts.get(id).status, "queued");
   await tap(900, `bc:send:${id}`); assert.match(last(900).text, /Not sent/);
-  await msg(900, "/launch"); assert.equal(broadcasts.get("2").button.ar.url, cfg.OKX_CAMPAIGN_URL); assert.match(broadcasts.get("2").text.en, /before everyone else[\s\S]*Wednesday 4 Nov/);
+  await msg(900, "/launch"); assert.equal(broadcasts.get("2").button.ar.url, cfg.OKX_CAMPAIGN_URL); assert.match(broadcasts.get("2").text.en, /COMPETITION IS LIVE[\s\S]*before everyone else[\s\S]*Wednesday 4 Nov/);
+  await msg(900, "/launch test", { reply_to_message: { message_id: 7, photo: [{ file_id: "SMALL" }, { file_id: "BIG" }] } });
+  assert.match(sent[sent.length - 3].text, /TEST, only you/); assert.equal(sent[sent.length - 2].image, "BIG", "launch preview is the largest image"); assert.ok(buttons(sent[sent.length - 2]).includes(cfg.OKX_CAMPAIGN_URL));
+  assert.equal([...broadcasts.values()].pop().photo, "BIG"); assert.equal([...broadcasts.values()].pop().kind, "launchtest");
+  await msg(900, undefined, { photo: [{ file_id: "CAP" }], caption: "/launch" }); assert.equal([...broadcasts.values()].pop().photo, "CAP", "image with /launch caption"); assert.equal([...broadcasts.values()].pop().audience, "signed_up");
   log("admin /stats, /broadcast preview + confirm, double-send blocked, /launch has OKX button in both languages");
 
   // nudge: only people who started but didn't finish; button resumes at their step

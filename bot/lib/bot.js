@@ -146,7 +146,8 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
   }
 
   /* ---------- admin ---------- */
-  async function adminCommand(chat, from, cmd, arg, row, video) {
+  async function adminCommand(chat, from, cmd, arg, row, media = {}) {
+    const video = media.video, photo = media.photo;
     if (cmd === "/whoami") { await tg.send(chat, `Your Telegram ID: <code>${from.id}</code>\nThis chat ID: <code>${chat}</code>`); return true; }
     if (cmd === "/stats" && !canSeeStats(from.id)) return false;
     if (cmd !== "/stats" && !isAdmin(from.id)) return false;
@@ -174,7 +175,8 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         const everyone = arg.toLowerCase() === "all";
         payload = { kind: "nudge", audience: "unfinished", filter: everyone ? null : { new_only: true }, text: { en: t("en").nudge, ar: t("ar").nudge }, button: { en: { text: t("en").bResume, data: "resume" }, ar: { text: t("ar").bResume, data: "resume" } } };
       } else if (cmd === "/launch") {
-        payload = { kind: "launch", text: { en: t("en").launch, ar: t("ar").launch }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
+        // with an image: reply to the image (or caption it) with /launch; "/launch test" sends it only to you
+        payload = { kind: testOnly ? "launchtest" : "launch", audience: testOnly ? "test" : "signed_up", filter: testOnly ? { only: String(from.id) } : null, photo, text: { en: t("en").launch, ar: t("ar").launch }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
       } else {
         if (!arg) { await tg.send(chat, "Usage: <code>/broadcast your message</code>\nSame text goes to everyone. For the launch-day message in both languages with the OKX button, use /launch."); return true; }
         payload = { kind: "text", text: { en: esc(arg), ar: esc(arg) } };
@@ -187,6 +189,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       const pkb = pb ? { reply_markup: { inline_keyboard: [[pb.data ? btn(pb.text, pb.data) : url(pb.text, pb.url)]] } } : {};
       const ptext = payload.text[row.lang === "ar" ? "ar" : "en"];
       if (payload.video) await tg.call("sendVideo", { chat_id: chat, video: payload.video, caption: ptext, parse_mode: "HTML", ...pkb });
+      else if (payload.photo) await tg.call("sendPhoto", { chat_id: chat, photo: payload.photo, caption: ptext, parse_mode: "HTML", ...pkb });
       else await tg.send(chat, ptext, pkb);
       await tg.send(chat, "Send it?", { reply_markup: { inline_keyboard: [[btn(`Send to ${d.recipients}`, `bc:send:${d.id}`), btn("Cancel", `bc:cancel:${d.id}`)]] } });
       return true;
@@ -212,7 +215,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     if (!msg || msg.chat.type !== "private" || !msg.from || msg.from.is_bot) return;
 
     const chat = msg.chat.id, from = msg.from;
-    const text = (msg.text || (msg.video ? msg.caption : "") || "").trim(); // a video's caption can carry an admin command (/rebind)
+    const text = (msg.text || (msg.video || msg.photo ? msg.caption : "") || "").trim(); // a video/image caption can carry an admin command (/rebind, /launch)
     const [cmdRaw, ...rest] = text.split(/\s+/);
     const cmd = text.startsWith("/") ? cmdRaw.split("@")[0].toLowerCase() : "";
     const arg = text.slice(cmdRaw.length).trim();
@@ -222,9 +225,10 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     let row = await db.touch({ id: from.id, username: from.username || "", first_name: from.first_name || "", last_name: from.last_name || "", language_code: from.language_code || "" }, ref);
     const L = t(row.lang);
 
-    // the video comes with the command (caption) or from the message it replies to, so it's uploaded only once
-    const vid = (msg.video || (msg.reply_to_message && msg.reply_to_message.video) || {}).file_id;
-    if (cmd && (await adminCommand(chat, from, cmd, arg, row, vid))) return;
+    // the video/image comes with the command (caption) or from the message it replies to, so it's uploaded only once
+    const src = msg.video || msg.photo ? msg : msg.reply_to_message || {};
+    const media = { video: src.video && src.video.file_id, photo: src.photo && src.photo.length ? src.photo[src.photo.length - 1].file_id : undefined }; // last = largest size
+    if (cmd && (await adminCommand(chat, from, cmd, arg, row, media))) return;
 
     if (cmd === "/start") {
       if (row.deleted === "yes" || row.consent === "no") row = await db.save(row.tg_id, { deleted: "", consent: "" });
