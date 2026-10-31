@@ -10,7 +10,7 @@ const tg = {
   send: async (chat, text, extra = {}) => { sent.push({ chat: String(chat), text, kb: extra.reply_markup }); return { message_id: sent.length }; },
   answer: async () => {},
   clearButtons: async () => {},
-  call: async () => ({}),
+  call: async (method, p = {}) => { if (method === "sendVideo") sent.push({ chat: String(p.chat_id), video: p.video, text: p.caption || "", kb: p.reply_markup }); return {}; },
   sendPhoto: async (chat, png, extra = {}) => { sent.push({ chat: String(chat), photo: png, text: extra.caption || "", kb: extra.reply_markup }); return {}; },
 };
 const users = new Map();
@@ -225,6 +225,17 @@ const log = (label) => console.log("✓", label);
   await msg(950, "/broadcast hi"); assert.ok(!/Preview/.test(last(950).text), "stats-only viewer can't broadcast");
   await msg(950, "/okx"); await msg(950, "/nudge"); assert.ok(!sent.slice(before).some((m) => /Preview/.test(m.text || "")), "no broadcast previews for viewer");
   log("STATS_IDS: read-only /stats for the ads team, no broadcasts");
+  await msg(900, "/rebind"); assert.match(last(900).text, /as a video/, "/rebind without a video only explains how");
+  const okx101 = users.get("101").okx; users.get("101").okx = "verified";
+  await msg(900, undefined, { video: { file_id: "VID123" }, caption: "/rebind" });
+  assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people \(signed up, already had an OKX account, never got this message before\)/);
+  const pv = sent[sent.length - 2]; assert.equal(pv.video, "VID123", "preview is the video"); assert.match(pv.text, /Join this community/); assert.match(pv.text, /1 Nov at 12:00/);
+  assert.ok(buttons(pv)[0].includes("rebindCode="), "rebind link button");
+  const rb = [...broadcasts.values()].pop(); assert.equal(rb.video, "VID123"); assert.equal(rb.kind, "rebind"); assert.deepStrictEqual(rb.filter, { okx: ["verified", "unverified"], new_only: true });
+  assert.ok(rb.text.ar.length < 1024 && rb.text.en.length < 1024, "captions fit Telegram's 1024 limit");
+  await msg(950, undefined, { video: { file_id: "X" }, caption: "/rebind" }); assert.equal(rb, [...broadcasts.values()].pop(), "stats viewer can't /rebind");
+  users.get("101").okx = okx101;
+  log("/rebind: video-only broadcast (caption + OKX rebind button) to signed-up people who already had an OKX account, once each");
 
   // 9. Apps Script phone normaliser
   const gs = fs.readFileSync(path.join(__dirname, "../apps-script/Code.gs"), "utf8");

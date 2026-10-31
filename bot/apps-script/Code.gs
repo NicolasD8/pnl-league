@@ -215,7 +215,7 @@ function draftBroadcast_(payload) {
   const recipients = allRows_(sheet_(USERS, UCOLS)).filter(audience_(audience, filter)).length;
   const b = blank_(BCOLS);
   b.id = String(Date.now()); b.status = "draft"; b.kind = clip_(payload.kind, 20);
-  b.payload = JSON.stringify({ text: payload.text || {}, button: payload.button || null, audience: audience, filter: filter });
+  b.payload = JSON.stringify({ text: payload.text || {}, button: payload.button || null, video: clip_(payload.video, 200) || null, audience: audience, filter: filter });
   b.admin_chat = clip_(payload.admin_chat, 30); b.recipients = recipients; b.cursor = 2; b.sent = 0; b.failed = 0; b.blocked = 0; b.created = new Date();
   writeRow_(sh, sh.getLastRow() + 1, b, BCOLS);
   return { id: b.id, recipients: recipients };
@@ -297,7 +297,9 @@ function processBroadcasts() {
         const params = { chat_id: u.tg_id, text: p.text[lang] || p.text.en, parse_mode: "HTML", disable_web_page_preview: true };
         const bt = p.button && p.button[lang];
         if (bt) params.reply_markup = JSON.stringify({ inline_keyboard: [[bt.data ? { text: bt.text, callback_data: bt.data } : { text: bt.text, url: bt.url }]] });
-        const res = tg_("sendMessage", params);
+        // a video broadcast sends the text as the video's caption (Telegram file_id, uploaded once by the admin)
+        if (p.video) { params.video = p.video; params.caption = params.text; delete params.text; delete params.disable_web_page_preview; }
+        const res = tg_(p.video ? "sendVideo" : "sendMessage", params);
         if (res.ok) {
           b.sent = Number(b.sent) + 1;
           if (b.kind === "nudge") ush.getRange(cursor, UCOLS.indexOf("nudged") + 1).setValue(new Date());

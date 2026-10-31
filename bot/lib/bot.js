@@ -22,6 +22,8 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
   // read-only: /stats and nothing else (e.g. the ads team)
   const viewers = new Set(String(cfg.STATS_IDS || "").split(",").map((s) => s.trim()).filter(Boolean));
   const canSeeStats = (id) => isAdmin(id) || viewers.has(String(id));
+  // existing OKX accounts join the PNL League affiliate community through this link
+  const REBIND_URL = cfg.OKX_REBIND_URL || "https://okx.com/ul/f1IP61?channelId=8754277&rebindCode=TGQ27Z5X";
 
   /* ---------- screens ---------- */
   function menu(L, row) {
@@ -144,7 +146,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
   }
 
   /* ---------- admin ---------- */
-  async function adminCommand(chat, from, cmd, arg, row) {
+  async function adminCommand(chat, from, cmd, arg, row, video) {
     if (cmd === "/whoami") { await tg.send(chat, `Your Telegram ID: <code>${from.id}</code>\nThis chat ID: <code>${chat}</code>`); return true; }
     if (cmd === "/stats" && !canSeeStats(from.id)) return false;
     if (cmd !== "/stats" && !isAdmin(from.id)) return false;
@@ -157,10 +159,13 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         `<b>Language</b> EN ${s.by_lang.en || 0} · AR ${s.by_lang.ar || 0}\n\n<b>By source</b>\n${top}` + adFunnel(s));
       return true;
     }
-    if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/nudge" || cmd === "/okx" || cmd === "/okxcheck") {
+    if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/nudge" || cmd === "/okx" || cmd === "/okxcheck" || cmd === "/rebind") {
       let payload;
       const everyoneAgain = arg.toLowerCase() === "all";
-      if (cmd === "/okxcheck") {
+      if (cmd === "/rebind") { // video only: existing OKX accounts join the PNL League community via the rebind link
+        if (!video) { await tg.send(chat, "Send the edited video to me <b>as a video</b> (not as a file), with <code>/rebind</code> as its caption. Add <code>/rebind all</code> to resend to people who already got it."); return true; }
+        payload = { kind: "rebind", audience: "signed_up", video, filter: everyoneAgain ? { okx: ["verified", "unverified"] } : { okx: ["verified", "unverified"], new_only: true }, text: { en: t("en").rebind, ar: t("ar").rebind }, button: { en: { text: t("en").bRebind, url: REBIND_URL }, ar: { text: t("ar").bRebind, url: REBIND_URL } } };
+      } else if (cmd === "/okxcheck") {
         payload = { kind: "okxcheck", audience: "signed_up", filter: everyoneAgain ? { okx: ["none", "unverified"] } : { okx: ["none", "unverified"], new_only: true }, text: { en: t("en").okxCheck, ar: t("ar").okxCheck }, button: { en: { text: t("en").bOkxUpdate, data: "okxu" }, ar: { text: t("ar").bOkxUpdate, data: "okxu" } } };
       } else if (cmd === "/okx") {
         if (!cfg.OKX_SIGNUP_URL) { await tg.send(chat, "Set OKX_SIGNUP_URL in Vercel first (your OKX affiliate link), then redeploy."); return true; }
@@ -175,10 +180,14 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         payload = { kind: "text", text: { en: esc(arg), ar: esc(arg) } };
       }
       const d = await db.draftBroadcast({ ...payload, admin_chat: String(chat) });
-      const who = payload.audience === "unfinished" ? (payload.filter && payload.filter.new_only ? "didn't finish signup, never nudged before" : "didn't finish signup, INCLUDING people already nudged") : payload.kind === "okx" || payload.kind === "okxcheck" ? `signed up, no OKX account or not verified, ${payload.filter && payload.filter.new_only ? "never got this message before" : "INCLUDING people who already got it"}` : "signed up, opted in";
+      const again = payload.filter && payload.filter.new_only ? "never got this message before" : "INCLUDING people who already got it";
+      const who = payload.audience === "unfinished" ? (payload.filter && payload.filter.new_only ? "didn't finish signup, never nudged before" : "didn't finish signup, INCLUDING people already nudged") : payload.kind === "okx" || payload.kind === "okxcheck" ? `signed up, no OKX account or not verified, ${again}` : payload.kind === "rebind" ? `signed up, already had an OKX account, ${again}` : "signed up, opted in";
       await tg.send(chat, `<b>Preview</b> · goes to <b>${d.recipients}</b> people (${who}):`);
       const pb = payload.button && payload.button.en;
-      await tg.send(chat, payload.text[row.lang === "ar" ? "ar" : "en"], pb ? { reply_markup: { inline_keyboard: [[pb.data ? btn(pb.text, pb.data) : url(pb.text, pb.url)]] } } : {});
+      const pkb = pb ? { reply_markup: { inline_keyboard: [[pb.data ? btn(pb.text, pb.data) : url(pb.text, pb.url)]] } } : {};
+      const ptext = payload.text[row.lang === "ar" ? "ar" : "en"];
+      if (payload.video) await tg.call("sendVideo", { chat_id: chat, video: payload.video, caption: ptext, parse_mode: "HTML", ...pkb });
+      else await tg.send(chat, ptext, pkb);
       await tg.send(chat, "Send it?", { reply_markup: { inline_keyboard: [[btn(`Send to ${d.recipients}`, `bc:send:${d.id}`), btn("Cancel", `bc:cancel:${d.id}`)]] } });
       return true;
     }
@@ -203,7 +212,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     if (!msg || msg.chat.type !== "private" || !msg.from || msg.from.is_bot) return;
 
     const chat = msg.chat.id, from = msg.from;
-    const text = (msg.text || "").trim();
+    const text = (msg.text || (msg.video ? msg.caption : "") || "").trim(); // a video's caption can carry an admin command (/rebind)
     const [cmdRaw, ...rest] = text.split(/\s+/);
     const cmd = text.startsWith("/") ? cmdRaw.split("@")[0].toLowerCase() : "";
     const arg = text.slice(cmdRaw.length).trim();
@@ -213,7 +222,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     let row = await db.touch({ id: from.id, username: from.username || "", first_name: from.first_name || "", last_name: from.last_name || "", language_code: from.language_code || "" }, ref);
     const L = t(row.lang);
 
-    if (cmd && (await adminCommand(chat, from, cmd, arg, row))) return;
+    if (cmd && (await adminCommand(chat, from, cmd, arg, row, msg.video && msg.video.file_id))) return;
 
     if (cmd === "/start") {
       if (row.deleted === "yes" || row.consent === "no") row = await db.save(row.tg_id, { deleted: "", consent: "" });
