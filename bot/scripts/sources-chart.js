@@ -1,6 +1,6 @@
 // Brand chart: where early-list signups came from + the signup flow.
 // usage: node scripts/sources-chart.js <out.png> '<json stats>'   (stats = the Sheet's "stats" action output)
-// Buckets: rich = ref "rich"; ads = any ref starting with "lead" or "awareness"; raw = no ref (direct) + anything else.
+// Buckets: rich = ref "rich"; ads = any ref starting with lead/awa/collab/ugc; raw = no ref (direct) + anything else.
 const fs = require("fs");
 const path = require("path");
 const { Resvg } = require("@resvg/resvg-js");
@@ -18,7 +18,7 @@ const b = { rich: 0, rami: 0, raw: 0, ads: 0 };
 for (const [ref, n] of Object.entries(s.by_ref || {})) {
   if (ref === "rich") b.rich += n;
   else if (ref === "rami") b.rami += n;
-  else if (/^(lead|awareness)/i.test(ref)) b.ads += n;
+  else if (/^(lead|awa|collab|ugc)/i.test(ref)) b.ads += n;
   else b.raw += n;
 }
 const total = b.rich + b.rami + b.raw + b.ads;
@@ -27,7 +27,7 @@ const slices = [
   { key: "rich", label: "RICH", sub: "Creator link", n: b.rich, fill: C.green },
   { key: "rami", label: "RAMI", sub: "Creator link", n: b.rami, fill: C.bone },
   { key: "raw", label: "RAW", sub: "Direct, no link tag", n: b.raw, fill: C.ash },
-  { key: "ads", label: "ADS", sub: "Lead + awareness links", n: b.ads, fill: C.slate },
+  { key: "ads", label: "ADS", sub: "Ad links", n: b.ads, fill: C.slate },
 ];
 const pct = (n) => (total ? Math.round((n / total) * 100) : 0);
 

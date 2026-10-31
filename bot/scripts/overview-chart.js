@@ -61,7 +61,7 @@ const blockedNote = st.blocked_bot ? `<text x="540" y="${ly - 4}" font-family="$
 /* ---------- by source (opened vs signed up, one scale) ---------- */
 const src = { rich: { opened: 0, signed_up: 0 }, rami: { opened: 0, signed_up: 0 }, raw: { opened: 0, signed_up: 0 }, ads: { opened: 0, signed_up: 0 } };
 for (const [ref, v] of Object.entries(o.by_source || {})) {
-  const k = ref === "rich" ? "rich" : ref === "rami" ? "rami" : /^(lead|awareness)/i.test(ref) ? "ads" : "raw";
+  const k = ref === "rich" ? "rich" : ref === "rami" ? "rami" : /^(lead|awa|collab|ugc)/i.test(ref) ? "ads" : "raw";
   src[k].opened += v.opened; src[k].signed_up += v.signed_up;
 }
 const rowsSrc = [["RICH", src.rich], ["RAMI", src.rami], ["RAW", src.raw], ["ADS", src.ads]];
