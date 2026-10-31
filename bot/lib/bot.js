@@ -19,6 +19,9 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
   const opensAt = new Date(cfg.REG_OPENS || "2026-11-01T12:00:00+03:00").getTime();
   const isOpen = () => now() >= opensAt;
   const isAdmin = (id) => admins.has(String(id));
+  // read-only: /stats and nothing else (e.g. the ads team)
+  const viewers = new Set(String(cfg.STATS_IDS || "").split(",").map((s) => s.trim()).filter(Boolean));
+  const canSeeStats = (id) => isAdmin(id) || viewers.has(String(id));
 
   /* ---------- screens ---------- */
   function menu(L, row) {
@@ -143,7 +146,8 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
   /* ---------- admin ---------- */
   async function adminCommand(chat, from, cmd, arg, row) {
     if (cmd === "/whoami") { await tg.send(chat, `Your Telegram ID: <code>${from.id}</code>\nThis chat ID: <code>${chat}</code>`); return true; }
-    if (!isAdmin(from.id)) return false;
+    if (cmd === "/stats" && !canSeeStats(from.id)) return false;
+    if (cmd !== "/stats" && !isAdmin(from.id)) return false;
     if (cmd === "/stats") {
       const s = await db.stats();
       const top = Object.entries(s.by_ref || {}).sort((a, b) => b[1] - a[1]).slice(0, 15).map(([k, v]) => `${esc(k)}: ${v}`).join("\n") || "none yet";

@@ -49,7 +49,7 @@ const db = {
 function pick(u) { const o = {}; ["username", "first_name", "last_name"].forEach((k) => { if (u[k] !== undefined) o[k] = u[k]; }); return o; }
 
 let clock = new Date("2026-10-26T10:00:00+02:00").getTime();
-const cfg = { BOT_USERNAME: "PNLLeagueBot", ADMIN_IDS: "900", REG_OPENS: "2026-11-01T12:00:00+03:00", OKX_CAMPAIGN_URL: "https://www.okx.com/campaigns/ce-community-trading-competition-phase-1", OKX_SIGNUP_URL: "https://example.com/okx-affiliate" };
+const cfg = { BOT_USERNAME: "PNLLeagueBot", ADMIN_IDS: "900", STATS_IDS: "950", REG_OPENS: "2026-11-01T12:00:00+03:00", OKX_CAMPAIGN_URL: "https://www.okx.com/campaigns/ce-community-trading-competition-phase-1", OKX_SIGNUP_URL: "https://example.com/okx-affiliate" };
 const bot = createBot({ tg, db, cfg, now: () => clock });
 
 let uid = 0;
@@ -220,6 +220,11 @@ const log = (label) => console.log("✓", label);
   await msg(900, "/stats"); assert.match(last(900).text, /lead3: 120 views → 45 taps → 30 in bot → 12 signed · 9 needed Telegram/);
   db.stats = realStats;
   log("/stats adds the ad-page funnel per tag");
+  const before = sent.length;
+  await msg(950, "/stats"); assert.match(last(950).text, /Early list/, "stats-only viewer gets /stats");
+  await msg(950, "/broadcast hi"); assert.ok(!/Preview/.test(last(950).text), "stats-only viewer can't broadcast");
+  await msg(950, "/okx"); await msg(950, "/nudge"); assert.ok(!sent.slice(before).some((m) => /Preview/.test(m.text || "")), "no broadcast previews for viewer");
+  log("STATS_IDS: read-only /stats for the ads team, no broadcasts");
 
   // 9. Apps Script phone normaliser
   const gs = fs.readFileSync(path.join(__dirname, "../apps-script/Code.gs"), "utf8");
