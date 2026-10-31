@@ -18,7 +18,7 @@ const esc = (x) => String(x).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt
 const st = o.stage || {};
 const mid = Object.entries(st).filter(([k]) => k.startsWith("mid_signup:"));
 const midN = mid.reduce((a, [, n]) => a + n, 0);
-const STEP = { name: "name", phone: "phone", okx: "OKX", exp: "style", elig: "18+", consent: "consent", question: "question" };
+const STEP = { name: "name", phone: "phone", okx: "OKX question", okxgo: "OKX link", confirm: "confirm", exp: "style", elig: "18+", consent: "consent", question: "question" };
 const groups = [
   { label: "SIGNED UP", sub: "Finished the early-list signup", n: st.signed_up || 0, fill: C.green },
   { label: "MID-SIGNUP", sub: (() => {
