@@ -105,11 +105,12 @@ ${link}` : "No problem. Open an OKX account and complete KYC before registration
   bOkxCreated: "✅ I've created my account",
   bOkxVerifiedNow: "✅ Done, I'm verified",
   bOkxLater: "I'll finish it before 1 Nov",
-  rebind: `⚠️ <b>Already have an OKX account? One step to enter PNL League.</b>
+  rebind: (link) => `⚠️ <b>Already have an OKX account? One step to enter PNL League.</b>
 
 Your account needs to join the PNL League community on OKX. It takes about 2 minutes on your phone. Watch the video, or:
 
-1. Tap the button below on the phone with the OKX app.
+1. On the phone with the OKX app, tap the button below or this link:
+${link}
 2. Log in. If OKX asks you to turn on <b>OKX Shield</b> first, follow its steps, then continue.
 3. On <b>"Join this community"</b>, write "PNL League" and tap <b>Submit</b>.
 4. You'll see "Application under review". Approval can take up to 1 business day, so <b>do it now</b>.
@@ -253,11 +254,12 @@ ${link}` : "لا مشكلة. افتح حسابًا على OKX وأكمل الت�
   bOkxCreated: "✅ أنشأت حسابي",
   bOkxVerifiedNow: "✅ تمّ، حسابي موثّق",
   bOkxLater: "سأكمله قبل 1 نوفمبر",
-  rebind: `⚠️ <b>عندك حساب على OKX؟ خطوة واحدة لتشارك في PNL League.</b>
+  rebind: (link) => `⚠️ <b>عندك حساب على OKX؟ خطوة واحدة لتشارك في PNL League.</b>
 
 لازم ينضمّ حسابك إلى مجتمع PNL League على OKX. بتاخد حوالي دقيقتين من تلفونك. شوف الفيديو، أو:
 
-1. اضغط الزر تحت من التلفون اللي عليه تطبيق OKX.
+1. من التلفون اللي عليه تطبيق OKX، اضغط الزر تحت أو هذا الرابط:
+${link}
 2. سجّل دخول. إذا طلب منك OKX تفعيل <b>OKX Shield</b> أولًا، اتبع الخطوات وكمّل.
 3. بصفحة <b>"Join this community"</b> اكتب "PNL League" واضغط <b>Submit</b>.
 4. رح تظهر "Application under review". الموافقة ممكن تاخد لحدّ يوم عمل، لهيك <b>اعملها هلّق</b>.
