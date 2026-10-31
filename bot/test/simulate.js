@@ -238,6 +238,8 @@ const log = (label) => console.log("✓", label);
   await msg(900, undefined, { video: { file_id: "VID123" }, caption: "/rebind test" });
   assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people \(TEST, only you\)/); assert.equal(sent[sent.length - 2].video, "VID123");
   assert.deepStrictEqual([...broadcasts.values()].pop().filter, { only: "900" }); assert.equal([...broadcasts.values()].pop().kind, "rebindtest", "test send doesn't count as the real one");
+  await msg(900, "/rebind test", { reply_to_message: { message_id: 5, video: { file_id: "VIDREPLY" } } });
+  assert.equal(sent[sent.length - 2].video, "VIDREPLY", "replying to an uploaded video reuses it");
   users.get("101").okx = okx101;
   log("/rebind: video-only broadcast (caption + OKX rebind button) to signed-up people who already had an OKX account, once each");
 

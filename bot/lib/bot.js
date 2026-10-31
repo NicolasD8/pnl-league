@@ -163,7 +163,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       let payload;
       const everyoneAgain = arg.toLowerCase() === "all", testOnly = arg.toLowerCase() === "test";
       if (cmd === "/rebind") { // video only: existing OKX accounts join the PNL League community via the rebind link
-        if (!video) { await tg.send(chat, "Send the edited video to me <b>as a video</b> (not as a file), with <code>/rebind</code> as its caption. Caption <code>/rebind test</code> sends it only to you first; <code>/rebind all</code> resends to people who already got it."); return true; }
+        if (!video) { await tg.send(chat, "Send me the video once <b>as a video</b> (not as a file). Then <b>reply</b> to it with <code>/rebind test</code> (only you) or <code>/rebind</code> (everyone who already had an OKX account). <code>/rebind all</code> resends to people who already got it. A <code>/rebind</code> caption on the video works too."); return true; }
         payload = { kind: testOnly ? "rebindtest" : "rebind", audience: testOnly ? "test" : "signed_up", video, filter: testOnly ? { only: String(from.id) } : everyoneAgain ? { okx: ["verified", "unverified"] } : { okx: ["verified", "unverified"], new_only: true }, text: { en: t("en").rebind(REBIND_URL), ar: t("ar").rebind(REBIND_URL) }, button: { en: { text: t("en").bRebind, url: REBIND_URL }, ar: { text: t("ar").bRebind, url: REBIND_URL } } };
       } else if (cmd === "/okxcheck") {
         payload = { kind: "okxcheck", audience: "signed_up", filter: everyoneAgain ? { okx: ["none", "unverified"] } : { okx: ["none", "unverified"], new_only: true }, text: { en: t("en").okxCheck, ar: t("ar").okxCheck }, button: { en: { text: t("en").bOkxUpdate, data: "okxu" }, ar: { text: t("ar").bOkxUpdate, data: "okxu" } } };
@@ -222,7 +222,9 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     let row = await db.touch({ id: from.id, username: from.username || "", first_name: from.first_name || "", last_name: from.last_name || "", language_code: from.language_code || "" }, ref);
     const L = t(row.lang);
 
-    if (cmd && (await adminCommand(chat, from, cmd, arg, row, msg.video && msg.video.file_id))) return;
+    // the video comes with the command (caption) or from the message it replies to, so it's uploaded only once
+    const vid = (msg.video || (msg.reply_to_message && msg.reply_to_message.video) || {}).file_id;
+    if (cmd && (await adminCommand(chat, from, cmd, arg, row, vid))) return;
 
     if (cmd === "/start") {
       if (row.deleted === "yes" || row.consent === "no") row = await db.save(row.tg_id, { deleted: "", consent: "" });
