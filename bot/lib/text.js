@@ -114,7 +114,7 @@ Your account needs to join the PNL League community on OKX. It takes about 2 min
 3. On <b>"Join this community"</b>, write "PNL League" and tap <b>Submit</b>.
 4. You'll see "Application under review". Approval can take up to 1 business day, so <b>do it now</b>.
 
-📩 <b>Today, 1 Nov at 12:00</b>, we'll send you a final message here with the <b>competition registration link</b>.`,
+📩 <b>Tomorrow at 8:00 AM</b>, we'll send you a final message here with the <b>competition registration link</b>.`,
   bRebind: "Open the OKX link",
   cardCaption: (no) => `<b>Your contender card${no ? " · #" + String(no).padStart(4, "0") : ""}</b>
 
@@ -262,7 +262,7 @@ ${link}` : "لا مشكلة. افتح حسابًا على OKX وأكمل الت�
 3. بصفحة <b>"Join this community"</b> اكتب "PNL League" واضغط <b>Submit</b>.
 4. رح تظهر "Application under review". الموافقة ممكن تاخد لحدّ يوم عمل، لهيك <b>اعملها هلّق</b>.
 
-📩 <b>اليوم، 1 نوفمبر الساعة 12:00</b>، رح نبعتلك رسالة أخيرة هون فيها <b>رابط التسجيل بالمسابقة</b>.`,
+📩 <b>بكرا الساعة 8:00 الصبح</b>، رح نبعتلك رسالة أخيرة هون فيها <b>رابط التسجيل بالمسابقة</b>.`,
   bRebind: "افتح رابط OKX",
   cardCaption: (no) => `<b>بطاقتك كمتنافس${no ? " · #" + String(no).padStart(4, "0") : ""}</b>
 

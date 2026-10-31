@@ -230,7 +230,7 @@ const log = (label) => console.log("✓", label);
   const okx101 = users.get("101").okx; users.get("101").okx = "verified";
   await msg(900, undefined, { video: { file_id: "VID123" }, caption: "/rebind" });
   assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people \(signed up, already had an OKX account, never got this message before\)/);
-  const pv = sent[sent.length - 2]; assert.equal(pv.video, "VID123", "preview is the video"); assert.match(pv.text, /Join this community/); assert.match(pv.text, /1 Nov at 12:00/);
+  const pv = sent[sent.length - 2]; assert.equal(pv.video, "VID123", "preview is the video"); assert.match(pv.text, /Join this community/); assert.match(pv.text, /Tomorrow at 8:00 AM/);
   assert.ok(buttons(pv)[0].includes("rebindCode="), "rebind link button");
   const rb = [...broadcasts.values()].pop(); assert.equal(rb.video, "VID123"); assert.equal(rb.kind, "rebind"); assert.deepStrictEqual(rb.filter, { okx: ["verified", "unverified"], new_only: true });
   assert.ok(rb.text.ar.length < 1024 && rb.text.en.length < 1024, "captions fit Telegram's 1024 limit");
