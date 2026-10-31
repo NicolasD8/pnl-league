@@ -20,7 +20,7 @@ const total = s.complete;
 const slices = [
   { label: "KYC VERIFIED", sub: "Ready for day one", n: ok.verified || 0, fill: C.green },
   { label: "NOT VERIFIED YET", sub: "Has an account, KYC to finish", n: ok.unverified || 0, fill: C.bone },
-  { label: "NO OKX ACCOUNT", sub: "Still needs to open one", n: ok.none || 0, fill: C.slate },
+  { label: "NO OKX ACCOUNT", sub: "When they signed up", n: ok.none || 0, fill: C.slate },
 ];
 const pct = (n, of = total) => (of ? Math.round((n / of) * 100) : 0);
 
@@ -71,7 +71,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" 
   <svg x="58" y="70" width="210" height="70" viewBox="20 9 244 81">${WORDMARK}</svg>
   <text x="1016" y="118" font-family="${D}" font-weight="700" font-size="26" letter-spacing="5" fill="${C.ash}" text-anchor="end">EARLY LIST · CONTENDERS</text>
 
-  <text x="64" y="262" font-family="${D}" font-weight="700" font-size="30" letter-spacing="8" fill="${C.ash}">INSIDE THE CONTENDER LIST · OKX STATUS</text>
+  <text x="64" y="262" font-family="${D}" font-weight="700" font-size="30" letter-spacing="8" fill="${C.ash}">OKX STATUS · AS TOLD TO THE BOT</text>
   <text x="64" y="372" font-family="${D}" font-weight="900" font-size="120" fill="${C.bone}"><tspan fill="${C.green}">${total}</tspan> SIGNED UP</text>
 
   ${donut}
@@ -84,7 +84,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" 
   <text x="64" y="1062" font-family="${D}" font-weight="900" font-size="130" fill="${C.green}">${invTotal}</text>
   <text x="${64 + String(invTotal).length * 62 + 20}" y="1018" font-family="${D}" font-weight="900" font-size="38" fill="${C.bone}">NEW OKX</text>
   <text x="${64 + String(invTotal).length * 62 + 20}" y="1058" font-family="${D}" font-weight="900" font-size="38" fill="${C.bone}">ACCOUNTS</text>
-  <text x="64" y="1094" font-family="${M}" font-size="20" fill="${C.ash}">signed up with your invite link</text>
+  <text x="64" y="1094" font-family="${M}" font-size="20" fill="${C.ash}">via your link · mostly from these 40</text>
   ${bars}
 
   <rect x="64" y="1120" width="952" height="2" fill="${C.line}"/>
