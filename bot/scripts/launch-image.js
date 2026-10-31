@@ -1,10 +1,11 @@
 // Launch-day image (1080x1350) for /launch: "The competition is live". Facts only, no profit claims.
-// usage: node scripts/launch-image.js <out.png>
+// usage: node scripts/launch-image.js <out.png> [background.jpg|png]   (photo is cropped to fill and darkened for legibility)
 const fs = require("fs");
 const path = require("path");
 const { Resvg } = require("@resvg/resvg-js");
 
 const out = process.argv[2] || path.join(__dirname, "..", "..", "reports", "launch-live.png");
+const bgFile = process.argv[3];
 const A = path.join(__dirname, "..", "assets");
 const FONTS = ["big-shoulders-display-latin-900-normal", "big-shoulders-display-latin-700-normal", "ibm-plex-mono-latin-400-normal", "ibm-plex-mono-latin-500-normal"].map((f) => path.join(A, "fonts", f + ".ttf"));
 const WORDMARK = fs.readFileSync(path.join(A, "wordmark.svg"), "utf8").replace(/^<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
@@ -22,9 +23,11 @@ for (let i = 0; i < 16; i++) {
   <rect x="${x}" y="${top}" width="34" height="${body}" fill="${up ? C.green : C.slate}" opacity="${up ? 0.16 : 0.12}"/>`;
 }
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
 <rect width="${W}" height="${H}" fill="${C.black}"/>
-${candles}
+${bgFile ? `<image x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" xlink:href="data:image/${/\.png$/i.test(bgFile) ? "png" : "jpeg"};base64,${fs.readFileSync(bgFile).toString("base64")}"/>
+<defs><linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.black}" stop-opacity="0.92"/><stop offset="0.42" stop-color="${C.black}" stop-opacity="0.55"/><stop offset="0.62" stop-color="${C.black}" stop-opacity="0.55"/><stop offset="0.78" stop-color="${C.black}" stop-opacity="0.9"/><stop offset="1" stop-color="${C.black}" stop-opacity="0.97"/></linearGradient></defs>
+<rect width="${W}" height="${H}" fill="url(#shade)"/>` : candles}
 <rect width="${W}" height="16" fill="${C.green}"/>
 <svg x="${X - 6}" y="64" width="210" height="70" viewBox="20 9 244 81">${WORDMARK}</svg>
 <g transform="translate(${W - X},112)">
