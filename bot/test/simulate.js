@@ -154,8 +154,15 @@ const log = (label) => console.log("✓", label);
   assert.match(sent[sent.length - 3].text, /TEST, only you/); assert.equal(sent[sent.length - 2].image, "BIG", "launch preview is the largest image"); assert.ok(buttons(sent[sent.length - 2]).includes(cfg.OKX_CAMPAIGN_URL));
   assert.equal([...broadcasts.values()].pop().photo, "BIG"); assert.equal([...broadcasts.values()].pop().kind, "launchtest");
   await msg(900, undefined, { photo: [{ file_id: "CAP" }], caption: "/launch" }); assert.equal([...broadcasts.values()].pop().photo, "CAP", "image with /launch caption"); assert.equal([...broadcasts.values()].pop().audience, "signed_up"); assert.deepStrictEqual([...broadcasts.values()].pop().filter, { new_only: true }, "launch goes once per person");
-  await msg(900, "/launch1"); { const b = [...broadcasts.values()].pop(); assert.equal(b.kind, "launch1"); assert.equal(b.filter, null, "launch1 reaches everyone signed up"); assert.ok(!b.photo, "text only"); assert.equal(b.button.en.url, cfg.OKX_CAMPAIGN_URL); }
-  assert.match(sent[sent.length - 3].text, /EVERY signed-up contender, text only/); assert.match(sent[sent.length - 2].text, /AMONG THE FIRST/);
+  await msg(900, "/launch1");
+  { const [a, b] = [...broadcasts.values()].slice(-2);
+    assert.equal(a.audience, "signed_up"); assert.equal(b.audience, "unfinished", "launch1 also reaches people who opened the bot but didn't finish");
+    assert.equal(a.filter, null); assert.equal(b.filter, null); assert.ok(!a.photo && !b.photo, "text only");
+    assert.match(a.text.en, /AMONG THE FIRST/); assert.match(b.text.en, /You opened PNL League early/); assert.equal(b.button.en.url, cfg.OKX_CAMPAIGN_URL); }
+  assert.match(sent[sent.length - 4].text, /people who opened the bot/);
+  const send2 = buttons(last(900))[0]; assert.match(send2, /^bc:send2:\d+:\d+$/);
+  await tap(900, send2); assert.match(last(900).text, /Sending to \d+ people now, in two batches/);
+  { const [a, b] = [...broadcasts.values()].slice(-2); assert.equal(a.status, "queued"); assert.equal(b.status, "queued", "one tap sends both"); }
   log("admin /stats, /broadcast preview + confirm, double-send blocked, /launch has OKX button in both languages");
 
   // nudge: only people who started but didn't finish; button resumes at their step

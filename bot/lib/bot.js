@@ -160,6 +160,19 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         `<b>Language</b> EN ${s.by_lang.en || 0} · AR ${s.by_lang.ar || 0}\n\n<b>By source</b>\n${top}` + adFunnel(s));
       return true;
     }
+    // /launch1: text-only launch to everyone who opened the bot = two sends behind one button
+    // (signed-up contenders + people who didn't finish; /stop, deleted, ineligible and blocked are left out by the Sheet)
+    if (cmd === "/launch1" && arg.toLowerCase() !== "test") {
+      const button = { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } };
+      const a = await db.draftBroadcast({ kind: "launch1", audience: "signed_up", filter: null, text: { en: t("en").launch, ar: t("ar").launch }, button, admin_chat: String(chat) });
+      const b = await db.draftBroadcast({ kind: "launch1", audience: "unfinished", filter: null, text: { en: t("en").launchOpened, ar: t("ar").launchOpened }, button, admin_chat: String(chat) });
+      const PL = t(row.lang), kb = { reply_markup: { inline_keyboard: [[url(PL.bRegister, cfg.OKX_CAMPAIGN_URL)]] } };
+      await tg.send(chat, `<b>Preview</b> · goes to <b>${a.recipients + b.recipients}</b> people who opened the bot: <b>${a.recipients}</b> signed-up contenders + <b>${b.recipients}</b> who didn't finish signup. (Anyone who sent /stop, deleted their data, is ineligible or blocked the bot is left out.)`);
+      await tg.send(chat, "<i>Signed-up contenders get:</i>\n\n" + PL.launch, kb);
+      await tg.send(chat, "<i>People who didn't finish signup get:</i>\n\n" + PL.launchOpened, kb);
+      await tg.send(chat, "Send it?", { reply_markup: { inline_keyboard: [[btn(`Send to ${a.recipients + b.recipients}`, `bc:send2:${a.id}:${b.id}`), btn("Cancel", `bc:cancel2:${a.id}:${b.id}`)]] } });
+      return true;
+    }
     if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/launch1" || cmd === "/nudge" || cmd === "/okx" || cmd === "/okxcheck" || cmd === "/rebind") {
       let payload;
       const everyoneAgain = arg.toLowerCase() === "all", testOnly = arg.toLowerCase() === "test";
@@ -292,10 +305,16 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     await tg.answer(q.id);
     if (!chat) return;
     let row = await db.touch({ id: from.id, username: from.username || "", first_name: from.first_name || "", last_name: from.last_name || "" });
-    const [kind, val, extra] = data.split(":");
+    const [kind, val, extra, extra2] = data.split(":");
 
     if (kind === "bc" && isAdmin(from.id)) {
       await tg.clearButtons(chat, q.message.message_id);
+      if (val === "send2") { // two drafts behind one button (/launch1)
+        const r1 = await db.sendBroadcast(extra), r2 = await db.sendBroadcast(extra2);
+        if (!r1.started && !r2.started) return tg.send(chat, `Not sent: ${esc(r1.error || r2.error || "already sent or cancelled")}`);
+        return tg.send(chat, `Sending to ${(r1.started ? r1.recipients : 0) + (r2.started ? r2.recipients : 0)} people now, in two batches. I'll message you here when each is done.`);
+      }
+      if (val === "cancel2") { await db.cancelBroadcast(extra); await db.cancelBroadcast(extra2); return tg.send(chat, "Cancelled."); }
       if (val === "send") { const r = await db.sendBroadcast(extra); return tg.send(chat, r.started ? `Sending to ${r.recipients} people now. I'll message you here when it's done.` : `Not sent: ${esc(r.error || "already sent or cancelled")}`); }
       await db.cancelBroadcast(extra);
       return tg.send(chat, "Cancelled.");
