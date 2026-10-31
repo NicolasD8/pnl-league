@@ -121,8 +121,9 @@ function isUnfinished_(u) {
 }
 // filter (optional) narrows the audience further, e.g. { okx: ["none","unverified"] } or { ref: ["rich"], lang: ["ar"] }
 function audience_(name, filter) {
-  const base = name === "unfinished" ? isUnfinished_ : isRecipient_;
   const f = filter || {};
+  if (name === "test") return function (u) { return !!f.only && String(u.tg_id) === String(f.only); }; // admin test send: only the admin
+  const base = name === "unfinished" ? isUnfinished_ : isRecipient_;
   const keys = Object.keys(f).filter(function (k) { return ["okx", "ref", "lang", "exp"].indexOf(k) >= 0 && Array.isArray(f[k]) && f[k].length; });
   const after = Number(f.created_after) || 0; // new_only: people who arrived after the last nudge
   return function (u) {
@@ -209,7 +210,7 @@ function overview_() {
 
 function draftBroadcast_(payload) {
   const sh = sheet_(BROADCASTS, BCOLS);
-  const audience = payload.audience === "unfinished" ? "unfinished" : "signed_up";
+  const audience = ["unfinished", "test"].indexOf(payload.audience) >= 0 ? payload.audience : "signed_up";
   const filter = payload.filter && typeof payload.filter === "object" ? payload.filter : null;
   if (filter && filter.new_only) { filter.kind = clip_(payload.kind, 20); if (filter.kind === "nudge") filter.created_after = lastNudgeAt_(); }
   const recipients = allRows_(sheet_(USERS, UCOLS)).filter(audience_(audience, filter)).length;

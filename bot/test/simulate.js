@@ -37,6 +37,7 @@ const db = {
   async draftBroadcast(p) {
     const id = String(broadcasts.size + 1); broadcasts.set(id, { ...p, status: "draft" });
     const unfinished = (u) => u.status !== "complete" && u.status !== "ineligible" && u.consent !== "no" && u.deleted !== "yes";
+    if (p.audience === "test") return { id, recipients: [...users.values()].filter((u) => u.tg_id === p.filter.only).length };
     const base = p.audience === "unfinished" ? unfinished : (u) => u.status === "complete" && u.consent === "yes";
     const f = p.filter || {};
     const keys = Object.keys(f).filter((k) => Array.isArray(f[k]));
@@ -234,6 +235,9 @@ const log = (label) => console.log("✓", label);
   const rb = [...broadcasts.values()].pop(); assert.equal(rb.video, "VID123"); assert.equal(rb.kind, "rebind"); assert.deepStrictEqual(rb.filter, { okx: ["verified", "unverified"], new_only: true });
   assert.ok(rb.text.ar.length < 1024 && rb.text.en.length < 1024, "captions fit Telegram's 1024 limit");
   await msg(950, undefined, { video: { file_id: "X" }, caption: "/rebind" }); assert.equal(rb, [...broadcasts.values()].pop(), "stats viewer can't /rebind");
+  await msg(900, undefined, { video: { file_id: "VID123" }, caption: "/rebind test" });
+  assert.match(sent[sent.length - 3].text, /goes to <b>1<\/b> people \(TEST, only you\)/); assert.equal(sent[sent.length - 2].video, "VID123");
+  assert.deepStrictEqual([...broadcasts.values()].pop().filter, { only: "900" }); assert.equal([...broadcasts.values()].pop().kind, "rebindtest", "test send doesn't count as the real one");
   users.get("101").okx = okx101;
   log("/rebind: video-only broadcast (caption + OKX rebind button) to signed-up people who already had an OKX account, once each");
 

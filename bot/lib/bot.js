@@ -161,10 +161,10 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     }
     if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/nudge" || cmd === "/okx" || cmd === "/okxcheck" || cmd === "/rebind") {
       let payload;
-      const everyoneAgain = arg.toLowerCase() === "all";
+      const everyoneAgain = arg.toLowerCase() === "all", testOnly = arg.toLowerCase() === "test";
       if (cmd === "/rebind") { // video only: existing OKX accounts join the PNL League community via the rebind link
-        if (!video) { await tg.send(chat, "Send the edited video to me <b>as a video</b> (not as a file), with <code>/rebind</code> as its caption. Add <code>/rebind all</code> to resend to people who already got it."); return true; }
-        payload = { kind: "rebind", audience: "signed_up", video, filter: everyoneAgain ? { okx: ["verified", "unverified"] } : { okx: ["verified", "unverified"], new_only: true }, text: { en: t("en").rebind, ar: t("ar").rebind }, button: { en: { text: t("en").bRebind, url: REBIND_URL }, ar: { text: t("ar").bRebind, url: REBIND_URL } } };
+        if (!video) { await tg.send(chat, "Send the edited video to me <b>as a video</b> (not as a file), with <code>/rebind</code> as its caption. Caption <code>/rebind test</code> sends it only to you first; <code>/rebind all</code> resends to people who already got it."); return true; }
+        payload = { kind: testOnly ? "rebindtest" : "rebind", audience: testOnly ? "test" : "signed_up", video, filter: testOnly ? { only: String(from.id) } : everyoneAgain ? { okx: ["verified", "unverified"] } : { okx: ["verified", "unverified"], new_only: true }, text: { en: t("en").rebind, ar: t("ar").rebind }, button: { en: { text: t("en").bRebind, url: REBIND_URL }, ar: { text: t("ar").bRebind, url: REBIND_URL } } };
       } else if (cmd === "/okxcheck") {
         payload = { kind: "okxcheck", audience: "signed_up", filter: everyoneAgain ? { okx: ["none", "unverified"] } : { okx: ["none", "unverified"], new_only: true }, text: { en: t("en").okxCheck, ar: t("ar").okxCheck }, button: { en: { text: t("en").bOkxUpdate, data: "okxu" }, ar: { text: t("ar").bOkxUpdate, data: "okxu" } } };
       } else if (cmd === "/okx") {
@@ -181,7 +181,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       }
       const d = await db.draftBroadcast({ ...payload, admin_chat: String(chat) });
       const again = payload.filter && payload.filter.new_only ? "never got this message before" : "INCLUDING people who already got it";
-      const who = payload.audience === "unfinished" ? (payload.filter && payload.filter.new_only ? "didn't finish signup, never nudged before" : "didn't finish signup, INCLUDING people already nudged") : payload.kind === "okx" || payload.kind === "okxcheck" ? `signed up, no OKX account or not verified, ${again}` : payload.kind === "rebind" ? `signed up, already had an OKX account, ${again}` : "signed up, opted in";
+      const who = payload.audience === "unfinished" ? (payload.filter && payload.filter.new_only ? "didn't finish signup, never nudged before" : "didn't finish signup, INCLUDING people already nudged") : payload.kind === "okx" || payload.kind === "okxcheck" ? `signed up, no OKX account or not verified, ${again}` : payload.kind === "rebind" ? `signed up, already had an OKX account, ${again}` : payload.audience === "test" ? "TEST, only you" : "signed up, opted in";
       await tg.send(chat, `<b>Preview</b> · goes to <b>${d.recipients}</b> people (${who}):`);
       const pb = payload.button && payload.button.en;
       const pkb = pb ? { reply_markup: { inline_keyboard: [[pb.data ? btn(pb.text, pb.data) : url(pb.text, pb.url)]] } } : {};
