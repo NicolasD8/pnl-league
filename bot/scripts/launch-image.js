@@ -33,10 +33,11 @@ ${candles}
   <text x="-18" y="2" font-family="${D}" font-weight="900" font-size="38" letter-spacing="4" fill="${C.green}" text-anchor="end">LIVE NOW</text>
 </g>
 
-<text x="${X}" y="262" font-family="${D}" font-weight="700" font-size="32" letter-spacing="9" fill="${C.ash}">EARLY LIST · FIRST ACCESS</text>
-<text x="${X - 6}" y="470" font-family="${D}" font-weight="900" font-size="210" fill="${C.bone}">THE</text>
-<text x="${X - 6}" y="675" font-family="${D}" font-weight="900" font-size="186" fill="${C.bone}">COMPETITION</text>
-<text x="${X - 6}" y="910" font-family="${D}" font-weight="900" font-size="230" fill="${C.green}">IS LIVE.</text>
+<text x="${X}" y="262" font-family="${D}" font-weight="700" font-size="32" letter-spacing="9" fill="${C.ash}">EARLY LIST · YOUR INVITATION</text>
+<text x="${X - 6}" y="470" font-family="${D}" font-weight="900" font-size="210" fill="${C.bone}">YOU'RE</text>
+<text x="${X - 6}" y="660" font-family="${D}" font-weight="900" font-size="186" fill="${C.bone}">AMONG THE</text>
+<text x="${X - 6}" y="880" font-family="${D}" font-weight="900" font-size="230" fill="${C.green}">FIRST.</text>
+<text x="${X}" y="940" font-family="${D}" font-weight="700" font-size="34" letter-spacing="6" fill="${C.ash}">THE COMPETITION IS LIVE. YOU GET IN FIRST.</text>
 
 <rect x="${X}" y="975" width="${CW}" height="126" fill="${C.green}"/>
 <text x="${X + 32}" y="1036" font-family="${D}" font-weight="900" font-size="50" fill="${C.black}">REGISTER ON OKX NOW</text>

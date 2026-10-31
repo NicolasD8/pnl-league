@@ -176,14 +176,14 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         payload = { kind: "nudge", audience: "unfinished", filter: everyone ? null : { new_only: true }, text: { en: t("en").nudge, ar: t("ar").nudge }, button: { en: { text: t("en").bResume, data: "resume" }, ar: { text: t("ar").bResume, data: "resume" } } };
       } else if (cmd === "/launch") {
         // with an image: reply to the image (or caption it) with /launch; "/launch test" sends it only to you
-        payload = { kind: testOnly ? "launchtest" : "launch", audience: testOnly ? "test" : "signed_up", filter: testOnly ? { only: String(from.id) } : null, photo, text: { en: t("en").launch, ar: t("ar").launch }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
+        payload = { kind: testOnly ? "launchtest" : "launch", audience: testOnly ? "test" : "signed_up", filter: testOnly ? { only: String(from.id) } : everyoneAgain ? null : { new_only: true }, photo, text: { en: t("en").launch, ar: t("ar").launch }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
       } else {
         if (!arg) { await tg.send(chat, "Usage: <code>/broadcast your message</code>\nSame text goes to everyone. For the launch-day message in both languages with the OKX button, use /launch."); return true; }
         payload = { kind: "text", text: { en: esc(arg), ar: esc(arg) } };
       }
       const d = await db.draftBroadcast({ ...payload, admin_chat: String(chat) });
       const again = payload.filter && payload.filter.new_only ? "never got this message before" : "INCLUDING people who already got it";
-      const who = payload.audience === "unfinished" ? (payload.filter && payload.filter.new_only ? "didn't finish signup, never nudged before" : "didn't finish signup, INCLUDING people already nudged") : payload.kind === "okx" || payload.kind === "okxcheck" ? `signed up, no OKX account or not verified, ${again}` : payload.kind === "rebind" ? `signed up, already had an OKX account, ${again}` : payload.audience === "test" ? "TEST, only you" : "signed up, opted in";
+      const who = payload.audience === "unfinished" ? (payload.filter && payload.filter.new_only ? "didn't finish signup, never nudged before" : "didn't finish signup, INCLUDING people already nudged") : payload.kind === "okx" || payload.kind === "okxcheck" ? `signed up, no OKX account or not verified, ${again}` : payload.kind === "rebind" ? `signed up, already had an OKX account, ${again}` : payload.audience === "test" ? "TEST, only you" : payload.kind === "launch" ? `ALL signed-up contenders, ${again}` : "signed up, opted in";
       await tg.send(chat, `<b>Preview</b> · goes to <b>${d.recipients}</b> people (${who}):`);
       const pb = payload.button && payload.button.en;
       const pkb = pb ? { reply_markup: { inline_keyboard: [[pb.data ? btn(pb.text, pb.data) : url(pb.text, pb.url)]] } } : {};
