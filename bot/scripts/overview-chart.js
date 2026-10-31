@@ -18,14 +18,14 @@ const esc = (x) => String(x).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt
 const st = o.stage || {};
 const mid = Object.entries(st).filter(([k]) => k.startsWith("mid_signup:"));
 const midN = mid.reduce((a, [, n]) => a + n, 0);
-const STEP = { name: "name", phone: "phone", okx: "OKX question", okxgo: "OKX link", confirm: "confirm", exp: "style", elig: "18+", consent: "consent", question: "question" };
+const STEP = { name: "name", phone: "phone", okx: "OKX", okxgo: "OKX link", confirm: "confirm", exp: "style", elig: "18+", consent: "consent", question: "question" };
 const groups = [
   { label: "SIGNED UP", sub: "Finished the early-list signup", n: st.signed_up || 0, fill: C.green },
   { label: "MID-SIGNUP", sub: (() => {
       const top = mid.sort((a, b) => b[1] - a[1]);
       const shown = top.slice(0, 3).map(([k, n]) => `${STEP[k.split(":")[1]] || k.split(":")[1]} ${n}`);
       const rest = top.slice(3).reduce((a, [, n]) => a + n, 0);
-      return "At: " + (shown.join(" · ") || "-") + (rest ? ` · other ${rest}` : "");
+      return (shown.join(" · ") || "-") + (rest ? ` · other ${rest}` : "");
     })(), n: midN, fill: C.bone },
   { label: "ONLY OPENED", sub: "Never tapped Join", n: st.opened_only || 0, fill: C.ash },
   { label: "DROPPED OUT", sub: `Ineligible ${st.ineligible || 0} · said no ${st.declined || 0} · deleted ${st.deleted || 0}`, n: (st.ineligible || 0) + (st.declined || 0) + (st.deleted || 0), fill: C.slate },
