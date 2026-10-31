@@ -154,6 +154,8 @@ const log = (label) => console.log("✓", label);
   assert.match(sent[sent.length - 3].text, /TEST, only you/); assert.equal(sent[sent.length - 2].image, "BIG", "launch preview is the largest image"); assert.ok(buttons(sent[sent.length - 2]).includes(cfg.OKX_CAMPAIGN_URL));
   assert.equal([...broadcasts.values()].pop().photo, "BIG"); assert.equal([...broadcasts.values()].pop().kind, "launchtest");
   await msg(900, undefined, { photo: [{ file_id: "CAP" }], caption: "/launch" }); assert.equal([...broadcasts.values()].pop().photo, "CAP", "image with /launch caption"); assert.equal([...broadcasts.values()].pop().audience, "signed_up"); assert.deepStrictEqual([...broadcasts.values()].pop().filter, { new_only: true }, "launch goes once per person");
+  await msg(900, "/launch1"); { const b = [...broadcasts.values()].pop(); assert.equal(b.kind, "launch1"); assert.equal(b.filter, null, "launch1 reaches everyone signed up"); assert.ok(!b.photo, "text only"); assert.equal(b.button.en.url, cfg.OKX_CAMPAIGN_URL); }
+  assert.match(sent[sent.length - 3].text, /EVERY signed-up contender, text only/); assert.match(sent[sent.length - 2].text, /AMONG THE FIRST/);
   log("admin /stats, /broadcast preview + confirm, double-send blocked, /launch has OKX button in both languages");
 
   // nudge: only people who started but didn't finish; button resumes at their step

@@ -160,7 +160,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         `<b>Language</b> EN ${s.by_lang.en || 0} · AR ${s.by_lang.ar || 0}\n\n<b>By source</b>\n${top}` + adFunnel(s));
       return true;
     }
-    if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/nudge" || cmd === "/okx" || cmd === "/okxcheck" || cmd === "/rebind") {
+    if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/launch1" || cmd === "/nudge" || cmd === "/okx" || cmd === "/okxcheck" || cmd === "/rebind") {
       let payload;
       const everyoneAgain = arg.toLowerCase() === "all", testOnly = arg.toLowerCase() === "test";
       if (cmd === "/rebind") { // video only: existing OKX accounts join the PNL League community via the rebind link
@@ -174,6 +174,8 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       } else if (cmd === "/nudge") {
         const everyone = arg.toLowerCase() === "all";
         payload = { kind: "nudge", audience: "unfinished", filter: everyone ? null : { new_only: true }, text: { en: t("en").nudge, ar: t("ar").nudge }, button: { en: { text: t("en").bResume, data: "resume" }, ar: { text: t("ar").bResume, data: "resume" } } };
+      } else if (cmd === "/launch1") { // text only, every signed-up contender (no once-per-person check); "/launch1 test" = only you
+        payload = { kind: testOnly ? "launchtest" : "launch1", audience: testOnly ? "test" : "signed_up", filter: testOnly ? { only: String(from.id) } : null, text: { en: t("en").launch, ar: t("ar").launch }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
       } else if (cmd === "/launch") {
         // with an image: reply to the image (or caption it) with /launch; "/launch test" sends it only to you
         payload = { kind: testOnly ? "launchtest" : "launch", audience: testOnly ? "test" : "signed_up", filter: testOnly ? { only: String(from.id) } : everyoneAgain ? null : { new_only: true }, photo, text: { en: t("en").launch, ar: t("ar").launch }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
@@ -183,7 +185,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       }
       const d = await db.draftBroadcast({ ...payload, admin_chat: String(chat) });
       const again = payload.filter && payload.filter.new_only ? "never got this message before" : "INCLUDING people who already got it";
-      const who = payload.audience === "unfinished" ? (payload.filter && payload.filter.new_only ? "didn't finish signup, never nudged before" : "didn't finish signup, INCLUDING people already nudged") : payload.kind === "okx" || payload.kind === "okxcheck" ? `signed up, no OKX account or not verified, ${again}` : payload.kind === "rebind" ? `signed up, already had an OKX account, ${again}` : payload.audience === "test" ? "TEST, only you" : payload.kind === "launch" ? `ALL signed-up contenders, ${again}` : "signed up, opted in";
+      const who = payload.audience === "unfinished" ? (payload.filter && payload.filter.new_only ? "didn't finish signup, never nudged before" : "didn't finish signup, INCLUDING people already nudged") : payload.kind === "okx" || payload.kind === "okxcheck" ? `signed up, no OKX account or not verified, ${again}` : payload.kind === "rebind" ? `signed up, already had an OKX account, ${again}` : payload.audience === "test" ? "TEST, only you" : payload.kind === "launch" ? `ALL signed-up contenders, ${again}` : payload.kind === "launch1" ? "EVERY signed-up contender, text only" : "signed up, opted in";
       await tg.send(chat, `<b>Preview</b> · goes to <b>${d.recipients}</b> people (${who}):`);
       const pb = payload.button && payload.button.en;
       const pkb = pb ? { reply_markup: { inline_keyboard: [[pb.data ? btn(pb.text, pb.data) : url(pb.text, pb.url)]] } } : {};
