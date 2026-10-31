@@ -17,10 +17,14 @@ const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt
 
 const ok = s.by_okx || {};
 const total = s.complete;
+// the OKX invitees came out of the "no account" group
+const invTotal = (x.invitees || []).reduce((t, [, n]) => t + n, 0);
+const viaLink = Math.min(invTotal, ok.none || 0);
 const slices = [
   { label: "KYC VERIFIED", sub: "Ready for day one", n: ok.verified || 0, fill: C.green },
-  { label: "NOT VERIFIED YET", sub: "Has an account, KYC to finish", n: ok.unverified || 0, fill: C.bone },
-  { label: "NO OKX ACCOUNT", sub: "When they signed up", n: ok.none || 0, fill: C.slate },
+  { label: "OPENED VIA YOUR LINK", sub: "New OKX account, KYC to finish", n: viaLink, fill: C.bone },
+  { label: "NOT VERIFIED YET", sub: "Had an account, KYC to finish", n: ok.unverified || 0, fill: C.ash },
+  { label: "NO OKX ACCOUNT YET", sub: "Still needs to open one", n: (ok.none || 0) - viaLink, fill: C.slate },
 ];
 const pct = (n, of = total) => (of ? Math.round((n / of) * 100) : 0);
 
@@ -40,18 +44,18 @@ for (const sl of slices) {
   donut += `<path d="${arc(a, a1)}" fill="${sl.fill}" stroke="${C.black}" stroke-width="4" stroke-linejoin="round"/>`;
   a = a1;
 }
-let legend = "", ly = 500;
+let legend = "", ly = 468;
 for (const sl of slices) {
   legend += `<rect x="580" y="${ly - 30}" width="26" height="26" fill="${sl.fill}"/>
-  <text x="622" y="${ly - 5}" font-family="${D}" font-weight="900" font-size="38" fill="${C.bone}">${sl.label}</text>
-  <text x="1016" y="${ly - 5}" font-family="${D}" font-weight="900" font-size="56" fill="${C.bone}" text-anchor="end">${sl.n}<tspan font-size="26" fill="${C.ash}" dx="10">${pct(sl.n)}%</tspan></text>
-  <text x="622" y="${ly + 30}" font-family="${M}" font-size="21" fill="${C.ash}">${sl.sub}</text>
-  <rect x="580" y="${ly + 50}" width="436" height="2" fill="${C.line}"/>`;
-  ly += 116;
+  <text x="622" y="${ly - 5}" font-family="${D}" font-weight="900" font-size="32" fill="${C.bone}">${sl.label}</text>
+  <text x="1016" y="${ly - 5}" font-family="${D}" font-weight="900" font-size="50" fill="${C.bone}" text-anchor="end">${sl.n}<tspan font-size="26" fill="${C.ash}" dx="10">${pct(sl.n)}%</tspan></text>
+  <text x="622" y="${ly + 28}" font-family="${M}" font-size="20" fill="${C.ash}">${sl.sub}</text>
+  <rect x="580" y="${ly + 48}" width="436" height="2" fill="${C.line}"/>`;
+  ly += 104;
 }
 
 // your OKX link: invitees per day (from the OKX app)
-const inv = x.invitees || [], invTotal = inv.reduce((t, [, n]) => t + n, 0), invMax = Math.max(1, ...inv.map(([, n]) => n));
+const inv = x.invitees || [], invMax = Math.max(1, ...inv.map(([, n]) => n));
 let bars = "";
 inv.forEach(([day, n], i) => {
   const bx = 560 + i * 150, h = Math.round((n / invMax) * 96), by = 1060 - h;
@@ -71,7 +75,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" 
   <svg x="58" y="70" width="210" height="70" viewBox="20 9 244 81">${WORDMARK}</svg>
   <text x="1016" y="118" font-family="${D}" font-weight="700" font-size="26" letter-spacing="5" fill="${C.ash}" text-anchor="end">EARLY LIST · CONTENDERS</text>
 
-  <text x="64" y="262" font-family="${D}" font-weight="700" font-size="30" letter-spacing="8" fill="${C.ash}">OKX STATUS · AS TOLD TO THE BOT</text>
+  <text x="64" y="262" font-family="${D}" font-weight="700" font-size="30" letter-spacing="8" fill="${C.ash}">INSIDE THE CONTENDER LIST · OKX STATUS</text>
   <text x="64" y="372" font-family="${D}" font-weight="900" font-size="120" fill="${C.bone}"><tspan fill="${C.green}">${total}</tspan> SIGNED UP</text>
 
   ${donut}
@@ -84,7 +88,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" 
   <text x="64" y="1062" font-family="${D}" font-weight="900" font-size="130" fill="${C.green}">${invTotal}</text>
   <text x="${64 + String(invTotal).length * 62 + 20}" y="1018" font-family="${D}" font-weight="900" font-size="38" fill="${C.bone}">NEW OKX</text>
   <text x="${64 + String(invTotal).length * 62 + 20}" y="1058" font-family="${D}" font-weight="900" font-size="38" fill="${C.bone}">ACCOUNTS</text>
-  <text x="64" y="1094" font-family="${M}" font-size="20" fill="${C.ash}">via your link · mostly from these 40</text>
+  <text x="64" y="1094" font-family="${M}" font-size="20" fill="${C.ash}">from the ${ok.none || 0} who had no account</text>
   ${bars}
 
   <rect x="64" y="1120" width="952" height="2" fill="${C.line}"/>
@@ -96,7 +100,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" 
   <text x="580" y="1232" font-family="${D}" font-weight="900" font-size="64" fill="${C.bone}">${x.okx_got ?? "-"}<tspan font-size="30" fill="${C.ash}" dx="12">of ${x.okx_reach ?? "-"} not verified</tspan></text>
   <text x="580" y="1262" font-family="${M}" font-size="20" fill="${C.ash}">via /okx, once per person</text>
 
-  <text x="64" y="1300" font-family="${M}" font-size="17" fill="${C.dim}">Source: @PNLLeagueBot + OKX invitee feed (not matched to bot users) · ${esc(stamp || "")}</text>
+  <text x="64" y="1300" font-family="${M}" font-size="17" fill="${C.dim}">Source: @PNLLeagueBot + OKX invitee feed · ${esc(stamp || "")}</text>
 </svg>`;
 
 fs.writeFileSync(out, new Resvg(svg, { fitTo: { mode: "width", value: 1080 }, font: { fontFiles: FONTS, loadSystemFonts: false, defaultFontFamily: M } }).render().asPng());
