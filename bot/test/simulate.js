@@ -149,7 +149,7 @@ const log = (label) => console.log("✓", label);
   assert.match(sent[sent.length - 2].text, /&lt;b&gt;now&lt;\/b&gt;/, "admin text is escaped");
   await tap(900, `bc:send:${id}`); assert.match(last(900).text, /Sending to/); assert.equal(broadcasts.get(id).status, "queued");
   await tap(900, `bc:send:${id}`); assert.match(last(900).text, /Not sent/);
-  await msg(900, "/launch"); assert.equal(broadcasts.get("2").button.ar.url, cfg.OKX_CAMPAIGN_URL);
+  await msg(900, "/launch"); assert.equal(broadcasts.get("2").button.ar.url, cfg.OKX_CAMPAIGN_URL); assert.match(broadcasts.get("2").text.en, /before everyone else[\s\S]*Wednesday 4 Nov/);
   log("admin /stats, /broadcast preview + confirm, double-send blocked, /launch has OKX button in both languages");
 
   // nudge: only people who started but didn't finish; button resumes at their step

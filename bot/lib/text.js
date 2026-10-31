@@ -11,7 +11,11 @@ const en = {
   welcomeBack: (name, cd) =>
     `You're on the list, <b>${name}</b>. Registration opens on OKX in <b>${cd}</b>, and we'll message you here the moment it does.`,
   open:
-    `<b>Registration is open.</b>\n\nJoin the campaign on OKX, make sure it shows "Enrolled", and start climbing.\n\n` +
+    `<b>Registration is open.</b>\n\nJoin the campaign on OKX, make sure it shows "Enrolled", and start climbing. Registration stays open until <b>Wednesday 4 Nov</b>.\n\n` +
+    `<i>18+. KYC required. Trading involves risk.</i>`,
+  // /launch: the early list gets the link before the public opening
+  launch:
+    `<b>You're in early. Registration is open for you.</b>\n\nAs an early-list contender, you get the link before everyone else. Join the campaign on OKX, make sure it shows "Enrolled", and start climbing.\n\nRegistration stays open until <b>Wednesday 4 Nov</b>.\n\n` +
     `<i>18+. KYC required. Trading involves risk.</i>`,
 
   // menu
@@ -162,7 +166,10 @@ const ar = {
   welcomeBack: (name, cd) =>
     `أنت على القائمة يا <b>${name}</b>. يفتح التسجيل على OKX خلال <b>${cd}</b>، وسنراسلك هنا لحظة فتحه.`,
   open:
-    `<b>التسجيل مفتوح.</b>\n\nانضم إلى الحملة على OKX، تأكّد أن حالتك تظهر "Enrolled"، وابدأ الصعود.\n\n` +
+    `<b>التسجيل مفتوح.</b>\n\nانضم إلى الحملة على OKX، تأكّد أن حالتك تظهر "Enrolled"، وابدأ الصعود. يبقى التسجيل مفتوحًا حتى <b>الأربعاء 4 نوفمبر</b>.\n\n` +
+    `<i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
+  launch:
+    `<b>أنت من الأوائل. التسجيل مفتوح لك.</b>\n\nبصفتك على القائمة المبكرة، يصلك الرابط قبل الجميع. انضم إلى الحملة على OKX، تأكّد أن حالتك تظهر "Enrolled"، وابدأ الصعود.\n\nيبقى التسجيل مفتوحًا حتى <b>الأربعاء 4 نوفمبر</b>.\n\n` +
     `<i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
 
   bJoin: "انضم إلى القائمة المبكرة",

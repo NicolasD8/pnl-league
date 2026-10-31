@@ -174,7 +174,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         const everyone = arg.toLowerCase() === "all";
         payload = { kind: "nudge", audience: "unfinished", filter: everyone ? null : { new_only: true }, text: { en: t("en").nudge, ar: t("ar").nudge }, button: { en: { text: t("en").bResume, data: "resume" }, ar: { text: t("ar").bResume, data: "resume" } } };
       } else if (cmd === "/launch") {
-        payload = { kind: "launch", text: { en: t("en").open, ar: t("ar").open }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
+        payload = { kind: "launch", text: { en: t("en").launch, ar: t("ar").launch }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
       } else {
         if (!arg) { await tg.send(chat, "Usage: <code>/broadcast your message</code>\nSame text goes to everyone. For the launch-day message in both languages with the OKX button, use /launch."); return true; }
         payload = { kind: "text", text: { en: esc(arg), ar: esc(arg) } };
