@@ -112,9 +112,9 @@ Your account needs to join the PNL League community on OKX. It takes about 2 min
 1. Tap the button below on the phone with the OKX app.
 2. Log in. If OKX asks you to turn on <b>OKX Shield</b> first, follow its steps, then continue.
 3. On <b>"Join this community"</b>, write "PNL League" and tap <b>Submit</b>.
-4. You'll see "Application under review". Approval can take up to 1 business day, so <b>do it today</b>.
+4. You'll see "Application under review". Approval can take up to 1 business day, so <b>do it now</b>.
 
-📩 <b>Tomorrow, 1 Nov at 12:00</b>, we'll send you a final message here with the <b>competition registration link</b>.`,
+📩 <b>Today, 1 Nov at 12:00</b>, we'll send you a final message here with the <b>competition registration link</b>.`,
   bRebind: "Open the OKX link",
   cardCaption: (no) => `<b>Your contender card${no ? " · #" + String(no).padStart(4, "0") : ""}</b>
 
@@ -260,9 +260,9 @@ ${link}` : "لا مشكلة. افتح حسابًا على OKX وأكمل الت�
 1. اضغط الزر تحت من التلفون اللي عليه تطبيق OKX.
 2. سجّل دخول. إذا طلب منك OKX تفعيل <b>OKX Shield</b> أولًا، اتبع الخطوات وكمّل.
 3. بصفحة <b>"Join this community"</b> اكتب "PNL League" واضغط <b>Submit</b>.
-4. رح تظهر "Application under review". الموافقة ممكن تاخد لحدّ يوم عمل، لهيك <b>اعملها اليوم</b>.
+4. رح تظهر "Application under review". الموافقة ممكن تاخد لحدّ يوم عمل، لهيك <b>اعملها هلّق</b>.
 
-📩 <b>بكرا، 1 نوفمبر الساعة 12:00</b>، رح نبعتلك رسالة أخيرة هون فيها <b>رابط التسجيل بالمسابقة</b>.`,
+📩 <b>اليوم، 1 نوفمبر الساعة 12:00</b>، رح نبعتلك رسالة أخيرة هون فيها <b>رابط التسجيل بالمسابقة</b>.`,
   bRebind: "افتح رابط OKX",
   cardCaption: (no) => `<b>بطاقتك كمتنافس${no ? " · #" + String(no).padStart(4, "0") : ""}</b>
 
