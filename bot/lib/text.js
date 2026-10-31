@@ -17,6 +17,8 @@ const en = {
   launch:
     `🟢 <b>YOU'RE AMONG THE FIRST.</b>\n\nThe competition is live, and the early list gets the invitation before anyone else. Tap below, join the campaign on OKX, make sure it shows "Enrolled", and start climbing.\n\nRegistration stays open until <b>Wednesday 4 Nov</b>. Prove you're the best.\n\n💬 Questions, or want to connect with other traders? Join our community: https://t.me/+SjuepdPTMUd5-BrQ\n\n` +
     `<i>18+. KYC required. Trading involves risk.</i>`,
+  // /photo: caption under the announcement image (same for everyone who opened the bot)
+  photoCaption: `🟢 <b>The competition is live.</b> Registration is open until <b>Wednesday 4 Nov</b>. Tap below to register on OKX.\n\n<i>18+. KYC required. Trading involves risk.</i>`,
   // /launch1, for people who opened the bot but didn't finish signup (not on the early list)
   launchOpened:
     `🟢 <b>THE COMPETITION IS LIVE.</b>\n\nYou opened PNL League early, so you get the invitation before the public. Tap below, join the campaign on OKX, make sure it shows "Enrolled", and start climbing.\n\nRegistration stays open until <b>Wednesday 4 Nov</b>. Prove you're the best.\n\n💬 Questions, or want to connect with other traders? Join our community: https://t.me/+SjuepdPTMUd5-BrQ\n\n` +
@@ -175,6 +177,7 @@ const ar = {
   launch:
     `🟢 <b>أنت من أوائل المدعوّين.</b>\n\nالمسابقة انطلقت، وأصحاب القائمة المبكرة تصلهم الدعوة قبل أي أحد. اضغط أدناه، انضم إلى الحملة على OKX، تأكّد أن حالتك تظهر "Enrolled"، وابدأ الصعود.\n\nيبقى التسجيل مفتوحًا حتى <b>الأربعاء 4 نوفمبر</b>. أثبت أنك الأفضل.\n\n💬 لديك أسئلة أو تريد التواصل مع متداولين آخرين؟ انضم إلى مجتمعنا: https://t.me/+SjuepdPTMUd5-BrQ\n\n` +
     `<i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
+  photoCaption: `🟢 <b>المسابقة انطلقت.</b> التسجيل مفتوح حتى <b>الأربعاء 4 نوفمبر</b>. اضغط أدناه للتسجيل على OKX.\n\n<i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
   launchOpened:
     `🟢 <b>المسابقة انطلقت.</b>\n\nفتحت PNL League باكرًا، لذلك تصلك الدعوة قبل الإعلان العام. اضغط أدناه، انضم إلى الحملة على OKX، تأكّد أن حالتك تظهر "Enrolled"، وابدأ الصعود.\n\nيبقى التسجيل مفتوحًا حتى <b>الأربعاء 4 نوفمبر</b>. أثبت أنك الأفضل.\n\n💬 لديك أسئلة أو تريد التواصل مع متداولين آخرين؟ انضم إلى مجتمعنا: https://t.me/+SjuepdPTMUd5-BrQ\n\n` +
     `<i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,

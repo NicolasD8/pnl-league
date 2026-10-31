@@ -162,18 +162,27 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     }
     // /launch1: text-only launch to everyone who opened the bot = two sends behind one button
     // (signed-up contenders + people who didn't finish; /stop, deleted, ineligible and blocked are left out by the Sheet)
-    if (cmd === "/launch1" && arg.toLowerCase() !== "test") {
+    // /photo: the announcement image (reply to it) to the same audience, sent after /launch1
+    if ((cmd === "/launch1" || cmd === "/photo") && arg.toLowerCase() !== "test") {
+      const isPhoto = cmd === "/photo";
+      if (isPhoto && !photo) { await tg.send(chat, "Send me the image <b>as a photo</b> (not as a file), then <b>reply</b> to it with <code>/photo test</code> (only you) or <code>/photo</code> (everyone who opened the bot)."); return true; }
       const button = { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } };
-      const a = await db.draftBroadcast({ kind: "launch1", audience: "signed_up", filter: null, text: { en: t("en").launch, ar: t("ar").launch }, button, admin_chat: String(chat) });
-      const b = await db.draftBroadcast({ kind: "launch1", audience: "unfinished", filter: null, text: { en: t("en").launchOpened, ar: t("ar").launchOpened }, button, admin_chat: String(chat) });
+      const kind = isPhoto ? "photo" : "launch1";
+      const textA = isPhoto ? { en: t("en").photoCaption, ar: t("ar").photoCaption } : { en: t("en").launch, ar: t("ar").launch };
+      const textB = isPhoto ? textA : { en: t("en").launchOpened, ar: t("ar").launchOpened };
+      const a = await db.draftBroadcast({ kind, audience: "signed_up", filter: null, photo, text: textA, button, admin_chat: String(chat) });
+      const b = await db.draftBroadcast({ kind, audience: "unfinished", filter: null, photo, text: textB, button, admin_chat: String(chat) });
       const PL = t(row.lang), kb = { reply_markup: { inline_keyboard: [[url(PL.bRegister, cfg.OKX_CAMPAIGN_URL)]] } };
       await tg.send(chat, `<b>Preview</b> · goes to <b>${a.recipients + b.recipients}</b> people who opened the bot: <b>${a.recipients}</b> signed-up contenders + <b>${b.recipients}</b> who didn't finish signup. (Anyone who sent /stop, deleted their data, is ineligible or blocked the bot is left out.)`);
-      await tg.send(chat, "<i>Signed-up contenders get:</i>\n\n" + PL.launch, kb);
-      await tg.send(chat, "<i>People who didn't finish signup get:</i>\n\n" + PL.launchOpened, kb);
+      if (isPhoto) await tg.call("sendPhoto", { chat_id: chat, photo, caption: PL.photoCaption, parse_mode: "HTML", ...kb });
+      else {
+        await tg.send(chat, "<i>Signed-up contenders get:</i>\n\n" + PL.launch, kb);
+        await tg.send(chat, "<i>People who didn't finish signup get:</i>\n\n" + PL.launchOpened, kb);
+      }
       await tg.send(chat, "Send it?", { reply_markup: { inline_keyboard: [[btn(`Send to ${a.recipients + b.recipients}`, `bc:send2:${a.id}:${b.id}`), btn("Cancel", `bc:cancel2:${a.id}:${b.id}`)]] } });
       return true;
     }
-    if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/launch1" || cmd === "/nudge" || cmd === "/okx" || cmd === "/okxcheck" || cmd === "/rebind") {
+    if (cmd === "/broadcast" || cmd === "/launch" || cmd === "/launch1" || cmd === "/photo" || cmd === "/nudge" || cmd === "/okx" || cmd === "/okxcheck" || cmd === "/rebind") {
       let payload;
       const everyoneAgain = arg.toLowerCase() === "all", testOnly = arg.toLowerCase() === "test";
       if (cmd === "/rebind") { // video only: existing OKX accounts join the PNL League community via the rebind link
@@ -187,6 +196,9 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       } else if (cmd === "/nudge") {
         const everyone = arg.toLowerCase() === "all";
         payload = { kind: "nudge", audience: "unfinished", filter: everyone ? null : { new_only: true }, text: { en: t("en").nudge, ar: t("ar").nudge }, button: { en: { text: t("en").bResume, data: "resume" }, ar: { text: t("ar").bResume, data: "resume" } } };
+      } else if (cmd === "/photo") { // "/photo test" = only you
+        if (!photo) { await tg.send(chat, "Reply to the image with <code>/photo test</code>."); return true; }
+        payload = { kind: "phototest", audience: "test", filter: { only: String(from.id) }, photo, text: { en: t("en").photoCaption, ar: t("ar").photoCaption }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
       } else if (cmd === "/launch1") { // text only, every signed-up contender (no once-per-person check); "/launch1 test" = only you
         payload = { kind: testOnly ? "launchtest" : "launch1", audience: testOnly ? "test" : "signed_up", filter: testOnly ? { only: String(from.id) } : null, text: { en: t("en").launch, ar: t("ar").launch }, button: { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } };
       } else if (cmd === "/launch") {

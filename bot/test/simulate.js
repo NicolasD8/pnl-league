@@ -163,6 +163,14 @@ const log = (label) => console.log("✓", label);
   const send2 = buttons(last(900))[0]; assert.match(send2, /^bc:send2:\d+:\d+$/);
   await tap(900, send2); assert.match(last(900).text, /Sending to \d+ people now, in two batches/);
   { const [a, b] = [...broadcasts.values()].slice(-2); assert.equal(a.status, "queued"); assert.equal(b.status, "queued", "one tap sends both"); }
+  await msg(900, "/photo"); assert.match(last(900).text, /as a photo/, "/photo needs an image");
+  await msg(900, "/photo test", { reply_to_message: { message_id: 9, photo: [{ file_id: "S" }, { file_id: "TROPHY" }] } });
+  assert.match(sent[sent.length - 3].text, /TEST, only you/); assert.equal(sent[sent.length - 2].image, "TROPHY");
+  await msg(900, "/photo", { reply_to_message: { message_id: 9, photo: [{ file_id: "S" }, { file_id: "TROPHY" }] } });
+  { const [a, b] = [...broadcasts.values()].slice(-2);
+    assert.equal(a.audience, "signed_up"); assert.equal(b.audience, "unfinished", "/photo reaches everyone who opened the bot");
+    assert.equal(a.photo, "TROPHY"); assert.equal(b.photo, "TROPHY"); assert.equal(a.kind, "photo"); assert.match(a.text.en, /competition is live/); }
+  assert.equal(sent[sent.length - 2].image, "TROPHY", "preview is the image"); assert.match(buttons(last(900))[0], /^bc:send2:/);
   log("admin /stats, /broadcast preview + confirm, double-send blocked, /launch has OKX button in both languages");
 
   // nudge: only people who started but didn't finish; button resumes at their step
