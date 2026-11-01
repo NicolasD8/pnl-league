@@ -162,6 +162,25 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     }
     // /launch1: text-only launch to everyone who opened the bot = two sends behind one button
     // (signed-up contenders + people who didn't finish; /stop, deleted, ineligible and blocked are left out by the Sheet)
+    // /registration: "we know joining is failing, we're fixing it, send us your OKX UID" to everyone who opened the bot.
+    // The button asks for the UID, which is forwarded to the admin chat (like /ask). "/registration test" = only you.
+    if (cmd === "/registration") {
+      const text = { en: t("en").regIssue, ar: t("ar").regIssue }, button = { en: { text: t("en").bSendUid, data: "uid" }, ar: { text: t("ar").bSendUid, data: "uid" } };
+      const PL = t(row.lang), kb = { reply_markup: { inline_keyboard: [[btn(PL.bSendUid, "uid")]] } };
+      if (arg.toLowerCase() === "test") {
+        const d = await db.draftBroadcast({ kind: "regtest", audience: "test", filter: { only: String(from.id) }, text, button, admin_chat: String(chat) });
+        await tg.send(chat, `<b>Preview</b> · goes to <b>${d.recipients}</b> people (TEST, only you):`);
+        await tg.send(chat, PL.regIssue, kb);
+        await tg.send(chat, "Send it?", { reply_markup: { inline_keyboard: [[btn(`Send to ${d.recipients}`, `bc:send:${d.id}`), btn("Cancel", `bc:cancel:${d.id}`)]] } });
+        return true;
+      }
+      const a = await db.draftBroadcast({ kind: "regissue", audience: "signed_up", filter: null, text, button, admin_chat: String(chat) });
+      const b = await db.draftBroadcast({ kind: "regissue", audience: "unfinished", filter: null, text, button, admin_chat: String(chat) });
+      await tg.send(chat, `<b>Preview</b> · goes to <b>${a.recipients + b.recipients}</b> people who opened the bot: <b>${a.recipients}</b> signed-up contenders + <b>${b.recipients}</b> who didn't finish signup. UIDs they send arrive here.`);
+      await tg.send(chat, PL.regIssue, kb);
+      await tg.send(chat, "Send it?", { reply_markup: { inline_keyboard: [[btn(`Send to ${a.recipients + b.recipients}`, `bc:send2:${a.id}:${b.id}`), btn("Cancel", `bc:cancel2:${a.id}:${b.id}`)]] } });
+      return true;
+    }
     // /photo: the announcement image (reply to it) to the same audience, sent after /launch1
     if ((cmd === "/launch1" || cmd === "/photo") && arg.toLowerCase() !== "test") {
       const isPhoto = cmd === "/photo";
@@ -278,6 +297,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       if (!row.no) row = await db.save(row.tg_id, {}); // older signups get their number now
       return sendCard(chat, row);
     }
+    if (cmd === "/uid") { await db.save(row.tg_id, { step: "uid" }); return tg.send(chat, L.askUid, { reply_markup: { force_reply: true, input_field_placeholder: "UID" } }); }
     if (cmd === "/ask") { await db.save(row.tg_id, { step: "question" }); return tg.send(chat, L.askQ, { reply_markup: { force_reply: true } }); }
 
     // free text / contact, depending on where the user is
@@ -301,6 +321,14 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
         await tg.send(chat, "✓", { reply_markup: { remove_keyboard: true } });
         return row.status === "complete" ? home(chat, row) : startSignup(chat, row);
       }
+    }
+    if (row.step === "uid" && text && !cmd) { // OKX UID for registration support -> admin chat
+      const uid = text.replace(/\s+/g, "");
+      if (!/^\d{6,20}$/.test(uid)) return tg.send(chat, L.badUid);
+      await db.save(row.tg_id, { step: "" });
+      const who = `${esc(row.name || [from.first_name, from.last_name].filter(Boolean).join(" "))}${from.username ? " @" + esc(from.username) : ""}`;
+      await tg.send(adminChat, `🆔 <b>OKX UID</b> from ${who}${row.no ? " · #" + esc(row.no) : ""} · ${row.status === "complete" ? "signed up" : "didn't finish signup"} · OKX: ${esc(row.okx || "?")} · #u${from.id}\n\n<code>${uid}</code>\n\n<i>Reply to this message to answer them.</i>`);
+      return tg.send(chat, L.uidThanks, { reply_markup: menu(L, row) });
     }
     if (row.step === "question" && text && !cmd) {
       await db.save(row.tg_id, { step: "" });
@@ -358,6 +386,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
       const kb = val !== "verified" && cfg.OKX_SIGNUP_URL ? [[url(L.bOpenOkx, cfg.OKX_SIGNUP_URL)], [btn(L.bBack, "m:home")]] : [[btn(L.bBack, "m:home")]];
       return tg.send(chat, reply, { reply_markup: { inline_keyboard: kb } });
     }
+    if (kind === "uid") { await db.save(row.tg_id, { step: "uid" }); return tg.send(chat, L.askUid, { reply_markup: { force_reply: true, input_field_placeholder: "UID" } }); }
     if (kind === "join" || kind === "resume") {
       return startSignup(chat, row); // also picks up anyone who stopped at an old step
     }

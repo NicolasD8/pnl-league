@@ -17,6 +17,12 @@ const en = {
   launch:
     `🟢 <b>YOU'RE AMONG THE FIRST.</b>\n\nThe competition is live, and the early list gets the invitation before anyone else. Tap below, join the campaign on OKX, make sure it shows "Enrolled", and start climbing.\n\nRegistration stays open until <b>Wednesday 4 Nov</b>. Prove you're the best.\n\n💬 Questions, or want to connect with other traders? Join our community: https://t.me/+SjuepdPTMUd5-BrQ\n\n` +
     `<i>18+. KYC required. Trading involves risk.</i>`,
+  // /registration: joining the campaign is failing for many; collect OKX UIDs
+  regIssue: `⚠️ <b>Can't join the competition yet?</b>\n\nYou're not alone. Many of you are seeing <i>"You don't meet the requirements to join this campaign"</i> on OKX. We're working on it with the OKX team right now, and you haven't missed anything.\n\nTo get you in as fast as possible, <b>send us your OKX UID</b>: tap the button below and paste it.\n\n<i>Find it in the OKX app: tap your profile picture (top left). Your UID is under your name, tap it to copy.</i>\n\nWe'll message you here as soon as it's fixed.`,
+  bSendUid: "Send my OKX UID",
+  askUid: "Paste your OKX UID here (numbers only).",
+  badUid: "That doesn't look like an OKX UID. It's a number (usually 8 to 20 digits). Copy it from your OKX profile and paste it here.",
+  uidThanks: "Got it, thanks ✅ Our team has your UID and will message you here as soon as you can join.",
   // /photo: caption under the announcement image (same for everyone who opened the bot)
   photoCaption: `🟢 <b>The competition is live.</b> Registration is open until <b>Wednesday 4 Nov</b>. Tap below to register on OKX.\n\n<i>18+. KYC required. Trading involves risk.</i>`,
   // /launch1, for people who opened the bot but didn't finish signup (not on the early list)
@@ -177,6 +183,11 @@ const ar = {
   launch:
     `🟢 <b>أنت من أوائل المدعوّين.</b>\n\nالمسابقة انطلقت، وأصحاب القائمة المبكرة تصلهم الدعوة قبل أي أحد. اضغط أدناه، انضم إلى الحملة على OKX، تأكّد أن حالتك تظهر "Enrolled"، وابدأ الصعود.\n\nيبقى التسجيل مفتوحًا حتى <b>الأربعاء 4 نوفمبر</b>. أثبت أنك الأفضل.\n\n💬 لديك أسئلة أو تريد التواصل مع متداولين آخرين؟ انضم إلى مجتمعنا: https://t.me/+SjuepdPTMUd5-BrQ\n\n` +
     `<i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
+  regIssue: `⚠️ <b>ما قدرت تنضمّ للمسابقة بعد؟</b>\n\nمش لحالك. كتير منكم عم تظهرلهم رسالة <i>"You don't meet the requirements to join this campaign"</i> على OKX. عم نشتغل عليها مع فريق OKX هلّق، وما فاتك شي.\n\nحتى نفوّتك بأسرع وقت، <b>ابعتلنا الـ UID تبعك على OKX</b>: اضغط الزر تحت وحطّه.\n\n<i>بتلاقيه بتطبيق OKX: اضغط على صورة البروفايل (فوق عالشمال). الـ UID تحت اسمك، اضغط عليه لتنسخه.</i>\n\nرح نراسلك هون أول ما تنحلّ.`,
+  bSendUid: "ابعت الـ UID تبعي",
+  askUid: "حطّ الـ UID تبعك على OKX هون (أرقام بس).",
+  badUid: "هيدا ما بيشبه UID على OKX. هو رقم (عادةً من 8 لـ 20 رقم). انسخه من البروفايل على OKX وحطّه هون.",
+  uidThanks: "وصلنا، شكرًا ✅ فريقنا معه الـ UID تبعك ورح نراسلك هون أول ما تقدر تنضمّ.",
   photoCaption: `🟢 <b>المسابقة انطلقت.</b> التسجيل مفتوح حتى <b>الأربعاء 4 نوفمبر</b>. اضغط أدناه للتسجيل على OKX.\n\n<i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
   launchOpened:
     `🟢 <b>المسابقة انطلقت.</b>\n\nفتحت PNL League باكرًا، لذلك تصلك الدعوة قبل الإعلان العام. اضغط أدناه، انضم إلى الحملة على OKX، تأكّد أن حالتك تظهر "Enrolled"، وابدأ الصعود.\n\nيبقى التسجيل مفتوحًا حتى <b>الأربعاء 4 نوفمبر</b>. أثبت أنك الأفضل.\n\n💬 لديك أسئلة أو تريد التواصل مع متداولين آخرين؟ انضم إلى مجتمعنا: https://t.me/+SjuepdPTMUd5-BrQ\n\n` +

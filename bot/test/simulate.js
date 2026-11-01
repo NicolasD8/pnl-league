@@ -163,6 +163,20 @@ const log = (label) => console.log("✓", label);
   const send2 = buttons(last(900))[0]; assert.match(send2, /^bc:send2:\d+:\d+$/);
   await tap(900, send2); assert.match(last(900).text, /Sending to \d+ people now, in two batches/);
   { const [a, b] = [...broadcasts.values()].slice(-2); assert.equal(a.status, "queued"); assert.equal(b.status, "queued", "one tap sends both"); }
+  await msg(900, "/registration");
+  { const [a, b] = [...broadcasts.values()].slice(-2);
+    assert.equal(a.audience, "signed_up"); assert.equal(b.audience, "unfinished", "/registration reaches everyone who opened the bot");
+    assert.equal(a.kind, "regissue"); assert.match(a.text.en, /You don't meet the requirements/); assert.equal(a.button.en.data, "uid"); }
+  assert.match(sent[sent.length - 2].text, /send us your OKX UID/); assert.match(buttons(last(900))[0], /^bc:send2:/);
+  await msg(900, "/registration test"); assert.match(sent[sent.length - 3].text, /TEST, only you/);
+  await tap(101, "uid"); assert.match(last(101).text, /Paste your OKX UID/);
+  await msg(101, "abc"); assert.match(last(101).text, /doesn't look like an OKX UID/);
+  await msg(101, "5123 4567 89"); assert.match(last(101).text, /Got it, thanks/);
+  const uidMsg = [...sent].reverse().find((s) => /🆔/.test(s.text || ""));
+  assert.ok(uidMsg && uidMsg.chat === "900" && uidMsg.text.includes("<code>5123456789</code>") && uidMsg.text.includes("#u101"), "UID forwarded to admin with #u id");
+  assert.equal(users.get("101").step, "", "step cleared after UID");
+  await msg(202, "/uid"); assert.match(last(202).text, /الـ UID/, "/uid works for anyone, in their language");
+  log("/registration: 'we're fixing it' to everyone who opened the bot; UID button collects OKX UIDs to the admin chat");
   await msg(900, "/photo"); assert.match(last(900).text, /as a photo/, "/photo needs an image");
   await msg(900, "/photo test", { reply_to_message: { message_id: 9, photo: [{ file_id: "S" }, { file_id: "TROPHY" }] } });
   assert.match(sent[sent.length - 3].text, /TEST, only you/); assert.equal(sent[sent.length - 2].image, "TROPHY");
