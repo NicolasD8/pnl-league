@@ -260,8 +260,9 @@ const log = (label) => console.log("✓", label);
 
   // OKX landing page (/okx/<tag>): two buttons, name + phone form, rebind vs sign-up link, lead saved to the Sheet
   const okxPage = require("../api/okx");
-  const call = async (req, fake) => { const out = { code: 0, body: "", h: {} };
-    await okxPage({ query: {}, headers: { "user-agent": "Mozilla/5.0 (iPhone)" }, ...req }, { setHeader: (k, v) => (out.h[k] = v), status: (c) => ({ send: (b) => { out.code = c; out.body = b; }, json: (b) => { out.code = c; out.body = b; }, end: () => { out.code = c; } }) }, fake);
+  const alerts = [], fakeTg = { send: async (chat, text) => { alerts.push({ chat, text }); } };
+  const call = async (req, fake, tg = fakeTg) => { const out = { code: 0, body: "", h: {} };
+    await okxPage({ query: {}, headers: { "user-agent": "Mozilla/5.0 (iPhone)" }, ...req }, { setHeader: (k, v) => (out.h[k] = v), status: (c) => ({ send: (b) => { out.code = c; out.body = b; }, json: (b) => { out.code = c; out.body = b; }, end: () => { out.code = c; } }) }, fake, tg);
     return out; };
   delete process.env.OKX_GROUP_URL;
   const lp = await call({ method: "GET", query: { ref: "Lead1_C1" } });
@@ -283,7 +284,15 @@ const log = (label) => console.log("✓", label);
   assert.equal(leads.length, 1, "bad leads are not saved");
   const down = await call({ method: "POST", body: { name: "Test", phone: "70123456", okx: "new" } }, { lead: async () => { throw new Error("sheet down"); } });
   assert.equal(down.code, 200, "a Sheet outage still lets them continue to OKX");
-  log("/okx landing page: two buttons, rebind vs sign-up links, KYC step, competition step, pixel events, Arabic, lead saved, bad input rejected");
+  const savedAdmin = process.env.ADMIN_CHAT_ID; process.env.ADMIN_CHAT_ID = "-100777";
+  alerts.length = 0;
+  await call({ method: "POST", body: { name: "Rami <b>", phone: "70123456", okx: "new", ref: "b1_lead1" } }, fakeSheet);
+  assert.equal(alerts[0].chat, "-100777"); assert.match(alerts[0].text, /New lead · OKX page/); assert.match(alerts[0].text, /wa\.me\/96170123456/);
+  assert.match(alerts[0].text, /No OKX account → sent to sign-up/); assert.match(alerts[0].text, /Ad: b1_lead1/); assert.ok(!/<b>"?<\/a>|Rami <b>/.test(alerts[0].text), "name escaped");
+  const tgDown = await call({ method: "POST", body: { name: "Test", phone: "+447700900123", okx: "has" } }, fakeSheet, { send: async () => { throw new Error("tg down"); } });
+  assert.equal(tgDown.code, 200, "a Telegram outage still lets them continue");
+  if (savedAdmin === undefined) delete process.env.ADMIN_CHAT_ID; else process.env.ADMIN_CHAT_ID = savedAdmin;
+  log("/okx landing page: two buttons, rebind vs sign-up links, KYC step, competition step, pixel events, Arabic, lead saved + admin alert with WhatsApp link, bad input rejected");
 
   // /stats shows the ad funnel once the page has traffic
   const realStats = db.stats; db.stats = async () => ({ ...(await realStats()), clicks: { lead3: { view: 120, tap_open: 45, tap_get_telegram: 9 } }, opened_by_ref: { lead3: 30 }, by_ref: { lead3: 12 } });

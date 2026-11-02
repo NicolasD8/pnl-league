@@ -4,7 +4,7 @@
 // POST: saves the lead (name, phone, has/new, tag) to the Sheet's "Leads" tab.
 const fs = require("fs");
 const path = require("path");
-const { sheet } = require("../lib/clients");
+const { sheet, telegram } = require("../lib/clients");
 const env = require("../lib/env");
 
 const REF_RE = /^[A-Za-z0-9_-]{1,40}$/;
@@ -54,7 +54,7 @@ const T = {
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const clean = (s, n) => String(s || "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, n);
 
-async function saveLead(req, res, e, sheetImpl) {
+async function saveLead(req, res, e, sheetImpl, tgImpl) {
   let b = req.body;
   if (typeof b === "string") { try { b = JSON.parse(b); } catch (err) { b = {}; } }
   b = b || {};
@@ -65,18 +65,34 @@ async function saveLead(req, res, e, sheetImpl) {
   const ua = req.headers["user-agent"] || "";
   const os = /android/i.test(ua) ? "android" : /iphone|ipad|ipod/i.test(ua) ? "ios" : "desktop";
   if (name.length < 2 || !PHONE_RE.test(phone) || !okx) return res.status(400).json({ ok: false, error: "bad lead" });
-  try {
-    await (sheetImpl || sheet(e.SHEET_URL, e.SHEET_SECRET)).lead({ name, phone, okx, ref, lang, os });
-  } catch (err) {
-    console.error("lead save failed", err && err.message); // still send them on: losing the signup is worse than losing the row
-  }
+  const adminChat = e.ADMIN_CHAT_ID || String(e.ADMIN_IDS || "").split(",")[0].trim();
+  await Promise.all([
+    (sheetImpl || sheet(e.SHEET_URL, e.SHEET_SECRET)).lead({ name, phone, okx, ref, lang, os })
+      .catch((err) => console.error("lead save failed", err && err.message)), // still send them on: losing the signup is worse than losing the row
+    // alert the admin chat with the time, so the lead can be matched to the OKX "new user joined" notification
+    adminChat && (tgImpl || telegram(e.BOT_TOKEN)).send(adminChat, leadAlert({ name, phone, okx, ref, lang, os }))
+      .catch((err) => console.error("lead alert failed", err && err.message)),
+  ]);
   res.status(200).json({ ok: true });
 }
 
-module.exports = async (req, res, sheetImpl) => {
+// WhatsApp needs the full international number; a bare local number is taken as Lebanese (+961)
+function waNumber(phone) {
+  let d = phone.replace(/^\+/, "").replace(/^00/, "");
+  if (!phone.startsWith("+") && !phone.startsWith("00") && d.length <= 8) d = "961" + d.replace(/^0/, "");
+  return d;
+}
+function leadAlert({ name, phone, okx, ref, lang, os }) {
+  const time = new Date().toLocaleString("en-GB", { timeZone: "Asia/Beirut", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  return `🧾 <b>New lead · OKX page</b>\n${esc(name)} · <a href="https://wa.me/${waNumber(phone)}">${esc(phone)}</a>\n` +
+    `${okx === "has" ? "Has an OKX account → sent to rebind" : "No OKX account → sent to sign-up"}\n` +
+    `Ad: ${esc(ref || "(direct)")} · ${lang.toUpperCase()} · ${os} · ${time} Beirut`;
+}
+
+module.exports = async (req, res, sheetImpl, tgImpl) => {
   const e = env();
   res.setHeader("cache-control", "no-store");
-  if (req.method === "POST") return saveLead(req, res, e, sheetImpl);
+  if (req.method === "POST") return saveLead(req, res, e, sheetImpl, tgImpl);
   const raw = String(req.query.ref || "").trim();
   const ref = REF_RE.test(raw) ? raw.toLowerCase() : "";
   const lang = String(req.query.lang || "").toLowerCase() === "ar" || /^ar\b/i.test(req.headers["accept-language"] || "") && req.query.lang !== "en" ? "ar" : "en";
