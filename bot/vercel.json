@@ -3,6 +3,8 @@
   "functions": { "api/*.js": { "maxDuration": 60, "includeFiles": "assets/**" } },
   "rewrites": [
     { "source": "/go/:ref", "destination": "/api/go?ref=:ref" },
-    { "source": "/go", "destination": "/api/go" }
+    { "source": "/go", "destination": "/api/go" },
+    { "source": "/okx/:ref", "destination": "/api/okx?ref=:ref" },
+    { "source": "/okx", "destination": "/api/okx" }
   ]
 }

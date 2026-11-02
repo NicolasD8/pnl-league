@@ -13,7 +13,9 @@ const USERS = "Users";
 const BROADCASTS = "Broadcasts";
 const CLICKS = "Clicks";
 const CCOLS = ["day", "ref", "event", "os", "count"];
-const CLICK_EVENTS = ["view", "tap_open", "auto_open", "tap_get_telegram", "tap_web", "left_page", "fallback_web"];
+const LEADS = "Leads";
+const LCOLS = ["created", "name", "phone", "okx", "ref", "lang", "os"];
+const CLICK_EVENTS = ["view", "tap_open", "auto_open", "tap_get_telegram", "tap_web", "left_page", "fallback_web", "lp_view", "lp_has", "lp_new", "lp_submit", "lp_rebind", "lp_signup", "lp_group"];
 const UCOLS = ["tg_id", "username", "first_name", "last_name", "language_code", "lang", "name", "phone", "okx", "exp",
   "eligible", "consent", "status", "step", "ref", "dup", "blocked", "deleted", "created", "updated", "no", "nudged", "got"];
 const BCOLS = ["id", "status", "kind", "payload", "admin_chat", "recipients", "cursor", "sent", "failed", "blocked", "created", "finished"];
@@ -30,6 +32,11 @@ function doPost(e) {
   // Click counts are append-only and never take the lock, so ad traffic can't make the bot wait.
   if (body.action === "track") {
     try { return json_(Object.assign({ ok: true }, track_(body.ref, body.event, body.os))); }
+    catch (err) { return json_({ ok: false, error: String(err && err.message || err) }); }
+  }
+  // Landing-page leads (/okx page) are append-only too.
+  if (body.action === "lead") {
+    try { return json_(Object.assign({ ok: true }, lead_(body.lead || {}))); }
     catch (err) { return json_({ ok: false, error: String(err && err.message || err) }); }
   }
   const lock = LockService.getScriptLock();
@@ -167,6 +174,15 @@ function track_(ref, event, os) {
   // One row per event (count 1). Totals add the count column, so old summed rows and new rows mix fine.
   sh.appendRow(["'" + day, ref || "(direct)", event, os, 1]);
   return { counted: true };
+}
+
+// One row per landing-page lead. okx: "has" (existing account, sent to rebind) or "new" (sent to sign-up).
+function lead_(l) {
+  const name = String(l.name || "").slice(0, 80), phone = String(l.phone || "");
+  if (name.length < 2 || !/^\+?[0-9]{7,15}$/.test(phone) || ["has", "new"].indexOf(l.okx) < 0) return { saved: false };
+  const ref = /^[a-z0-9_-]{0,40}$/.test(String(l.ref || "")) ? String(l.ref || "") : "";
+  sheet_(LEADS, LCOLS).appendRow([new Date(), name, "'" + phone, l.okx, ref || "(direct)", l.lang === "ar" ? "ar" : "en", String(l.os || "")]);
+  return { saved: true };
 }
 
 function clickTotals_() {

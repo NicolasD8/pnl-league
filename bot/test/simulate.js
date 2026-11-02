@@ -258,6 +258,30 @@ const log = (label) => console.log("✓", label);
   assert.match(render("lead3", "x", { lang: "ar" }).body, /dir="rtl"/);
   log("/go bridge page: Android intent link, iPhone tg:// link, desktop t.me link, store links, bad tags dropped, Arabic version");
 
+  // OKX landing page (/okx/<tag>): two buttons, name + phone form, rebind vs sign-up link, lead saved to the Sheet
+  const okxPage = require("../api/okx");
+  const call = async (req, fake) => { const out = { code: 0, body: "", h: {} };
+    await okxPage({ query: {}, headers: { "user-agent": "Mozilla/5.0 (iPhone)" }, ...req }, { setHeader: (k, v) => (out.h[k] = v), status: (c) => ({ send: (b) => { out.code = c; out.body = b; }, json: (b) => { out.code = c; out.body = b; }, end: () => { out.code = c; } }) }, fake);
+    return out; };
+  delete process.env.OKX_GROUP_URL;
+  const lp = await call({ method: "GET", query: { ref: "Lead1_C1" } });
+  assert.equal(lp.code, 200); assert.match(lp.body, /I have an OKX account/); assert.match(lp.body, /I don&#39;t have an OKX account/);
+  assert.match(lp.body, /rebindCode=TGQ27Z5X/); assert.match(lp.body, /okx\.com\/join\/8754277/); assert.match(lp.body, /var ref="lead1_c1"/);
+  assert.ok(!/id="grp"/.test(lp.body), "no group button until OKX_GROUP_URL is set");
+  process.env.OKX_GROUP_URL = "https://www.okx.com/group/test";
+  assert.match((await call({ method: "GET", query: {} })).body, /id="grp" href="https:\/\/www\.okx\.com\/group\/test"/);
+  delete process.env.OKX_GROUP_URL;
+  assert.match((await call({ method: "GET", query: { lang: "ar" } })).body, /dir="rtl"/);
+  const leads = [], fakeSheet = { lead: async (l) => { leads.push(l); } };
+  const ok = await call({ method: "POST", body: JSON.stringify({ name: "Test User", phone: "+961 70-123 456", okx: "has", ref: "lead1_c1", lang: "en" }) }, fakeSheet);
+  assert.equal(ok.code, 200); assert.deepEqual(leads[0], { name: "Test User", phone: "+96170123456", okx: "has", ref: "lead1_c1", lang: "en", os: "ios" });
+  assert.equal((await call({ method: "POST", body: { name: "T", phone: "12", okx: "has" } }, fakeSheet)).code, 400);
+  assert.equal((await call({ method: "POST", body: { name: "Test", phone: "+96170123456", okx: "maybe" } }, fakeSheet)).code, 400);
+  assert.equal(leads.length, 1, "bad leads are not saved");
+  const down = await call({ method: "POST", body: { name: "Test", phone: "70123456", okx: "new" } }, { lead: async () => { throw new Error("sheet down"); } });
+  assert.equal(down.code, 200, "a Sheet outage still lets them continue to OKX");
+  log("/okx landing page: two buttons, rebind vs sign-up links, optional OKX group button, Arabic, lead saved, bad input rejected");
+
   // /stats shows the ad funnel once the page has traffic
   const realStats = db.stats; db.stats = async () => ({ ...(await realStats()), clicks: { lead3: { view: 120, tap_open: 45, tap_get_telegram: 9 } }, opened_by_ref: { lead3: 30 }, by_ref: { lead3: 12 } });
   await msg(900, "/stats"); assert.match(last(900).text, /lead3: 120 views → 45 taps → 30 in bot → 12 signed · 9 needed Telegram/);
