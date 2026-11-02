@@ -1,6 +1,6 @@
 // Vercel function: OKX landing page for ads. Ads point to https://<app>/okx/<tag> (e.g. /okx/lead1_c1).
 // GET: two buttons ("I have an OKX account" / "I don't"), then name + phone, then the right OKX link
-//      (rebind for existing accounts, sign-up for new ones) and the OKX group where the competition link is posted.
+//      (rebind for existing accounts, sign-up for new ones) and the competition link to join once that's done.
 // POST: saves the lead (name, phone, has/new, tag) to the Sheet's "Leads" tab.
 const fs = require("fs");
 const path = require("path");
@@ -10,7 +10,8 @@ const env = require("../lib/env");
 const REF_RE = /^[A-Za-z0-9_-]{1,40}$/;
 const PHONE_RE = /^\+?[0-9]{7,15}$/;
 const SIGNUP = "https://okx.com/join/8754277";
-const REBIND = "https://okx.com/ul/f1IP61?channelId=8754277&rebindCode=TGQ27Z5X";
+const CAMPAIGN = "https://www.okx.com/campaigns/ce-community-trading-competition-phase-1?channelid=8754277";
+const REBIND ="https://okx.com/ul/f1IP61?channelId=8754277&rebindCode=TGQ27Z5X";
 let FONT = "";
 try { FONT = fs.readFileSync(path.join(__dirname, "..", "assets", "fonts", "big-shoulders-display-latin-900-normal.woff2")).toString("base64"); } catch (e) {}
 
@@ -26,9 +27,9 @@ const T = {
     hasBtn: "Link my OKX account",
     newH: "Create your OKX account", newP: "Sign up with our link, then finish identity verification (KYC Level 2): profile picture > Verification.",
     newBtn: "Sign up on OKX",
-    grpH: "Then join our OKX group", grpP: "We post the competition link there, so you get it as a notification on your phone.",
-    grpBtn: "Join the PNL League group",
-    grpNone: "We'll send you the competition link in our OKX group: PNLLeague by CE.",
+    compH: "Then join the competition", compBtn: "Join the competition",
+    compHas: "Once your rebind is approved (up to 1 business day), open the competition, tap \"Join Campaign\" and check it says \"Enrolled\".",
+    compNew: "Once your KYC is verified, open the competition, tap \"Join Campaign\" and check it says \"Enrolled\".",
     foot: "18+. KYC required. Trading involves risk. PNL League by CE · Presented by OKX",
   },
   ar: {
@@ -42,9 +43,9 @@ const T = {
     hasBtn: "اربط حسابي على OKX",
     newH: "أنشئ حسابك على OKX", newP: "سجّل عبر رابطنا، ثم أكمل التحقق من الهوية (KYC المستوى 2): صورة الملف > Verification.",
     newBtn: "سجّل على OKX",
-    grpH: "ثم انضم إلى مجموعتنا على OKX", grpP: "ننشر رابط المسابقة هناك، فيصلك كإشعار على هاتفك.",
-    grpBtn: "انضم إلى مجموعة PNL League",
-    grpNone: "سنرسل لك رابط المسابقة في مجموعتنا على OKX: PNLLeague by CE.",
+    compH: "ثم انضم إلى المسابقة", compBtn: "انضم إلى المسابقة",
+    compHas: "بعد الموافقة على الربط (خلال يوم عمل واحد)، افتح المسابقة، اضغط \"Join Campaign\" وتأكد أنها تقول \"Enrolled\".",
+    compNew: "بعد التحقق من هويتك (KYC)، افتح المسابقة، اضغط \"Join Campaign\" وتأكد أنها تقول \"Enrolled\".",
     foot: "‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر. PNL League by CE · Presented by OKX",
   },
 };
@@ -81,7 +82,7 @@ module.exports = async (req, res, sheetImpl) => {
   const ua = req.headers["user-agent"] || "";
   const os = /android/i.test(ua) ? "android" : /iphone|ipad|ipod/i.test(ua) ? "ios" : "desktop";
   const signup = e.OKX_SIGNUP_URL || SIGNUP, rebind = e.OKX_REBIND_URL || REBIND;
-  const group = /^https:\/\//.test(e.OKX_GROUP_URL || "") ? e.OKX_GROUP_URL : "";
+  const comp = /^https:\/\//.test(e.OKX_CAMPAIGN_URL || "") ? e.OKX_CAMPAIGN_URL : CAMPAIGN;
   const pixel = /^\d{6,20}$/.test(e.META_PIXEL_ID || "") ? e.META_PIXEL_ID : "";
   const arrow = `<span aria-hidden="true">${L.dir === "rtl" ? "←" : "→"}</span>`;
 
@@ -162,9 +163,9 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
     </div>
     <div class="card">
       <div class="n">02</div>
-      <h2>${esc(L.grpH)}</h2>
-      <p>${esc(group ? L.grpP : L.grpNone)}</p>
-      ${group ? `<a class="btn alt" id="grp" href="${esc(group)}">${esc(L.grpBtn)} ${arrow}</a>` : ""}
+      <h2>${esc(L.compH)}</h2>
+      <p id="compP"></p>
+      <a class="btn alt" id="comp" href="${esc(comp)}">${esc(L.compBtn)} ${arrow}</a>
     </div>
   </section>
 </main>
@@ -172,7 +173,7 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
 <script>
 (function(){
   var ref=${JSON.stringify(ref)}, os=${JSON.stringify(os)}, lang=${JSON.stringify(lang)}, sent={}, okx="";
-  var TX=${JSON.stringify({ has: [L.hasH, L.hasP, L.hasBtn, rebind], new: [L.newH, L.newP, L.newBtn, signup], errName: L.errName, errPhone: L.errPhone })};
+  var TX=${JSON.stringify({ has: [L.hasH, L.hasP, L.hasBtn, rebind, L.compHas], new: [L.newH, L.newP, L.newBtn, signup, L.compNew], errName: L.errName, errPhone: L.errPhone })};
   var $=function(id){return document.getElementById(id)};
   function track(ev){ if(sent[ev])return; sent[ev]=1;
     var body=JSON.stringify({e:ev,r:ref,os:os});
@@ -191,17 +192,18 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
     if(name.length<2){ $("err").textContent=TX.errName; return $("name").focus(); }
     if(!/^\\+?[0-9]{7,15}$/.test(phone)){ $("err").textContent=TX.errPhone; return $("phone").focus(); }
     $("err").textContent=""; $("done").disabled=true;
-    var t=TX[okx], go=function(){
-      track("lp_submit"); ${pixel ? 'try{fbq("track","Lead",{content_name:okx})}catch(e){}' : ""}
-      $("okxH").textContent=t[0]; $("okxP").textContent=t[1]; $("okx").href=t[3];
-      $("okx").insertBefore(document.createTextNode(t[2]+" "),$("okx").firstChild);
-      show("s3");
-    };
-    fetch("/api/okx",{method:"POST",headers:{"content-type":"text/plain"},body:JSON.stringify({name:name,phone:phone,okx:okx,ref:ref,lang:lang})})
-      .then(go,go);
+    // save in the background (a beacon survives them leaving for OKX) and move on at once: the Sheet takes seconds
+    var lead=JSON.stringify({name:name,phone:phone,okx:okx,ref:ref,lang:lang}), queued=false;
+    try{ queued=navigator.sendBeacon&&navigator.sendBeacon("/api/okx",new Blob([lead],{type:"text/plain"})); }catch(e){}
+    if(!queued){ try{ fetch("/api/okx",{method:"POST",body:lead,keepalive:true,headers:{"content-type":"text/plain"}}); }catch(e){} }
+    track("lp_submit"); ${pixel ? 'try{fbq("track","Lead",{content_name:okx})}catch(e){}' : ""}
+    var t=TX[okx];
+    $("okxH").textContent=t[0]; $("okxP").textContent=t[1]; $("compP").textContent=t[4]; $("okx").href=t[3];
+    $("okx").insertBefore(document.createTextNode(t[2]+" "),$("okx").firstChild);
+    show("s3");
   });
   $("okx").addEventListener("click",function(){ track(okx==="has"?"lp_rebind":"lp_signup"); });
-  if($("grp")) $("grp").addEventListener("click",function(){ track("lp_group"); });
+  $("comp").addEventListener("click",function(){ track("lp_comp"); });
 })();
 </script>
 </body>

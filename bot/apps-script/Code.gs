@@ -15,7 +15,7 @@ const CLICKS = "Clicks";
 const CCOLS = ["day", "ref", "event", "os", "count"];
 const LEADS = "Leads";
 const LCOLS = ["created", "name", "phone", "okx", "ref", "lang", "os"];
-const CLICK_EVENTS = ["view", "tap_open", "auto_open", "tap_get_telegram", "tap_web", "left_page", "fallback_web", "lp_view", "lp_has", "lp_new", "lp_submit", "lp_rebind", "lp_signup", "lp_group"];
+const CLICK_EVENTS = ["view", "tap_open", "auto_open", "tap_get_telegram", "tap_web", "left_page", "fallback_web", "lp_view", "lp_has", "lp_new", "lp_submit", "lp_rebind", "lp_signup", "lp_group", "lp_comp"];
 const UCOLS = ["tg_id", "username", "first_name", "last_name", "language_code", "lang", "name", "phone", "okx", "exp",
   "eligible", "consent", "status", "step", "ref", "dup", "blocked", "deleted", "created", "updated", "no", "nudged", "got"];
 const BCOLS = ["id", "status", "kind", "payload", "admin_chat", "recipients", "cursor", "sent", "failed", "blocked", "created", "finished"];
