@@ -162,7 +162,7 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
       <div class="n">01</div>
       <h2 id="okxH"></h2>
       <p id="okxP"></p>
-      <a class="btn" id="okx" href="#">${arrow}</a>
+      <a class="btn" id="okx" href="#"><span id="okxT"></span> ${arrow}</a>
     </div>
     <div class="card" id="kyc">
       <div class="n">02</div>
@@ -180,7 +180,7 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
 <footer>${esc(L.foot)}</footer>
 <script>
 (function(){
-  var ref=${JSON.stringify(ref)}, os=${JSON.stringify(os)}, lang=${JSON.stringify(lang)}, sent={}, okx="";
+  var ref=${JSON.stringify(ref)}, os=${JSON.stringify(os)}, lang=${JSON.stringify(lang)}, sent={}, okx="", done=false;
   var TX=${JSON.stringify({ has: [L.hasH, L.hasP, L.hasBtn, rebind, L.compHas], new: [L.newH, L.newP, L.newBtn, signup, L.compNew], errName: L.errName, errPhone: L.errPhone })};
   var $=function(id){return document.getElementById(id)};
   function track(ev){ if(sent[ev])return; sent[ev]=1;
@@ -188,13 +188,18 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
     try{ if(navigator.sendBeacon&&navigator.sendBeacon("/api/track",new Blob([body],{type:"text/plain"})))return; }catch(e){}
     try{ fetch("/api/track",{method:"POST",body:body,keepalive:true,headers:{"content-type":"text/plain"}}); }catch(e){}
   }
-  function show(id){ ["s1","s2","s3"].forEach(function(s){ $(s).hidden=s!==id; }); window.scrollTo(0,0); }
+  // each step is a history entry, so the phone's Back button goes back a step instead of leaving the page
+  function show(id,fromHistory){ ["s1","s2","s3"].forEach(function(s){ $(s).hidden=s!==id; }); window.scrollTo(0,0);
+    if(!fromHistory){ try{ history.pushState({s:id,okx:okx},""); }catch(e){} } }
+  try{ history.replaceState({s:"s1"},""); }catch(e){}
+  window.addEventListener("popstate",function(ev){ var s=ev.state&&ev.state.s||"s1"; if(s==="s3"&&!done)s="s2";
+    if(s!=="s3") $("done").disabled=false; show(s,true); });
   function px(ev,custom){ ${pixel ? 'try{ fbq(custom?"trackCustom":"track",ev,{content_name:okx||"",ad:ref}); }catch(e){}' : ""} }
   function pick(k){ okx=k; track(k==="has"?"lp_has":"lp_new"); px(k==="has"?"ChoseHasOKX":"ChoseNoOKX",1); show("s2"); $("name").focus(); }
   track("lp_view");
   $("has").addEventListener("click",function(){ pick("has"); });
   $("new").addEventListener("click",function(){ pick("new"); });
-  $("back").addEventListener("click",function(){ show("s1"); });
+  $("back").addEventListener("click",function(){ history.back(); });
   $("s2").addEventListener("submit",function(ev){
     ev.preventDefault();
     var name=$("name").value.trim(), phone=$("phone").value.replace(/[\\s().-]/g,"");
@@ -209,7 +214,7 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
     var t=TX[okx];
     $("okxH").textContent=t[0]; $("okxP").textContent=t[1]; $("compP").textContent=t[4]; $("okx").href=t[3];
     $("kyc").hidden=okx==="has"; $("compN").textContent=okx==="has"?"02":"03";
-    $("okx").insertBefore(document.createTextNode(t[2]+" "),$("okx").firstChild);
+    $("okxT").textContent=t[2]; done=true;
     show("s3");
   });
   $("okx").addEventListener("click",function(){ track(okx==="has"?"lp_rebind":"lp_signup"); px(okx==="has"?"OpenRebind":"OpenOKXSignup",1); });
