@@ -40,7 +40,7 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
   async function home(chat, row) {
     const L = t(row.lang);
     const left = opensAt - now();
-    const text = isOpen() ? L.open
+    const text = isOpen() ? `${L.open}\n\n${L.openRebind(REBIND_URL.replace(/&/g, "&amp;"))}`
       : row.status === "complete" ? L.welcomeBack(esc(firstName(row)), countdown(left, row.lang))
       : L.welcome(countdown(left, row.lang));
     await tg.send(chat, text, { reply_markup: menu(L, row) });
@@ -164,20 +164,24 @@ function createBot({ tg, db, cfg, now = () => Date.now(), card = (o) => require(
     // (signed-up contenders + people who didn't finish; /stop, deleted, ineligible and blocked are left out by the Sheet)
     // /registration: "we know joining is failing, we're fixing it, send us your OKX UID" to everyone who opened the bot.
     // The button asks for the UID, which is forwarded to the admin chat (like /ask). "/registration test" = only you.
-    if (cmd === "/registration") {
-      const text = { en: t("en").regIssue, ar: t("ar").regIssue }, button = { en: { text: t("en").bSendUid, data: "uid" }, ar: { text: t("ar").bSendUid, data: "uid" } };
-      const PL = t(row.lang), kb = { reply_markup: { inline_keyboard: [[btn(PL.bSendUid, "uid")]] } };
+    // /fixed: "registration works now" + the two reasons people are still blocked (KYC level 2, rebind). Same audience and flow.
+    if (cmd === "/registration" || cmd === "/fixed") {
+      const fixed = cmd === "/fixed", L2 = (lang) => (fixed ? t(lang).regFixed(cfg.OKX_CAMPAIGN_URL, REBIND_URL) : t(lang).regIssue);
+      const text = { en: L2("en"), ar: L2("ar") };
+      const button = fixed ? { en: { text: t("en").bRegister, url: cfg.OKX_CAMPAIGN_URL }, ar: { text: t("ar").bRegister, url: cfg.OKX_CAMPAIGN_URL } } : { en: { text: t("en").bSendUid, data: "uid" }, ar: { text: t("ar").bSendUid, data: "uid" } };
+      const PL = t(row.lang), kb = { reply_markup: { inline_keyboard: [[fixed ? url(PL.bRegister, cfg.OKX_CAMPAIGN_URL) : btn(PL.bSendUid, "uid")]] } };
+      const kindName = fixed ? "regfixed" : "regissue";
       if (arg.toLowerCase() === "test") {
         const d = await db.draftBroadcast({ kind: "regtest", audience: "test", filter: { only: String(from.id) }, text, button, admin_chat: String(chat) });
         await tg.send(chat, `<b>Preview</b> · goes to <b>${d.recipients}</b> people (TEST, only you):`);
-        await tg.send(chat, PL.regIssue, kb);
+        await tg.send(chat, L2(row.lang), kb);
         await tg.send(chat, "Send it?", { reply_markup: { inline_keyboard: [[btn(`Send to ${d.recipients}`, `bc:send:${d.id}`), btn("Cancel", `bc:cancel:${d.id}`)]] } });
         return true;
       }
-      const a = await db.draftBroadcast({ kind: "regissue", audience: "signed_up", filter: null, text, button, admin_chat: String(chat) });
-      const b = await db.draftBroadcast({ kind: "regissue", audience: "unfinished", filter: null, text, button, admin_chat: String(chat) });
-      await tg.send(chat, `<b>Preview</b> · goes to <b>${a.recipients + b.recipients}</b> people who opened the bot: <b>${a.recipients}</b> signed-up contenders + <b>${b.recipients}</b> who didn't finish signup. UIDs they send arrive here.`);
-      await tg.send(chat, PL.regIssue, kb);
+      const a = await db.draftBroadcast({ kind: kindName, audience: "signed_up", filter: null, text, button, admin_chat: String(chat) });
+      const b = await db.draftBroadcast({ kind: kindName, audience: "unfinished", filter: null, text, button, admin_chat: String(chat) });
+      await tg.send(chat, `<b>Preview</b> · goes to <b>${a.recipients + b.recipients}</b> people who opened the bot: <b>${a.recipients}</b> signed-up contenders + <b>${b.recipients}</b> who didn't finish signup.${fixed ? "" : " UIDs they send arrive here."}`);
+      await tg.send(chat, L2(row.lang), kb);
       await tg.send(chat, "Send it?", { reply_markup: { inline_keyboard: [[btn(`Send to ${a.recipients + b.recipients}`, `bc:send2:${a.id}:${b.id}`), btn("Cancel", `bc:cancel2:${a.id}:${b.id}`)]] } });
       return true;
     }

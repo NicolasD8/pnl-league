@@ -169,6 +169,13 @@ const log = (label) => console.log("✓", label);
     assert.equal(a.kind, "regissue"); assert.match(a.text.en, /You don't meet the requirements/); assert.equal(a.button.en.data, "uid"); }
   assert.match(sent[sent.length - 2].text, /send us your OKX UID/); assert.match(buttons(last(900))[0], /^bc:send2:/);
   await msg(900, "/registration test"); assert.match(sent[sent.length - 3].text, /TEST, only you/);
+  await msg(900, "/fixed");
+  { const [a, b] = [...broadcasts.values()].slice(-2);
+    assert.equal(a.kind, "regfixed"); assert.equal(b.audience, "unfinished", "/fixed reaches everyone who opened the bot");
+    assert.match(a.text.en, /Registration is fixed[\s\S]*KYC Level 2[\s\S]*rebind step/); assert.ok(a.text.en.includes("rebindCode=TGQ27Z5X"), "rebind link in the text");
+    assert.ok(a.text.en.includes(cfg.OKX_CAMPAIGN_URL), "competition link in the text"); assert.equal(a.button.en.url, cfg.OKX_CAMPAIGN_URL); assert.match(b.text.ar, /المستوى 2/); }
+  assert.match(sent[sent.length - 2].text, /Registration is fixed/);
+  await msg(900, "/fixed test"); assert.match(sent[sent.length - 3].text, /TEST, only you/); assert.match(sent[sent.length - 2].text, /Registration is fixed/);
   await tap(101, "uid"); assert.match(last(101).text, /Paste your OKX UID/);
   await msg(101, "abc"); assert.match(last(101).text, /doesn't look like an OKX UID/);
   await msg(101, "5123 4567 89"); assert.match(last(101).text, /Got it, thanks/);

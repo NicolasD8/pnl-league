@@ -19,6 +19,10 @@ const en = {
     `<i>18+. KYC required. Trading involves risk.</i>`,
   // /registration: joining the campaign is failing for many; collect OKX UIDs
   regIssue: `⚠️ <b>Can't join the competition yet?</b>\n\nYou're not alone. Many of you are seeing <i>"You don't meet the requirements to join this campaign"</i> on OKX. We're working on it with the OKX team right now, and you haven't missed anything.\n\nTo get you in as fast as possible, <b>send us your OKX UID</b>: tap the button below and paste it.\n\n<i>Find it in the OKX app: tap your profile picture (top left). Your UID is under your name, tap it to copy.</i>\n\nWe'll message you here as soon as it's fixed.`,
+  openRebind: (link) => `<b>Already had an OKX account before PNL League?</b> Link it to us first, then join:
+${link}`,
+  // /fixed: registration works again + the two reasons someone may still be blocked
+  regFixed: (camp, rebind) => `✅ <b>Registration is fixed. You can join now.</b>\n\nOpen the competition, tap <b>Join</b> and make sure it says <b>"Enrolled"</b>:\n${camp.replace(/&/g, "&amp;")}\n\n<b>Still blocked?</b> It's one of two things:\n\n<b>1. KYC Level 2.</b> Your OKX account needs identity verification Level 2. In the OKX app: tap your profile picture, then Verification, and finish Level 2. Then try again.\n\n<b>2. The rebind step.</b> If you already had an OKX account before PNL League, link it to us first:\n${rebind.replace(/&/g, "&amp;")}\nSubmit, wait for approval, then join.\n\nStill stuck? Send /uid with your OKX UID and we'll check it for you.\n\n<i>18+. KYC required. Trading involves risk.</i>`,
   bSendUid: "Send my OKX UID",
   askUid: "Paste your OKX UID here (numbers only).",
   badUid: "That doesn't look like an OKX UID. It's a number (usually 8 to 20 digits). Copy it from your OKX profile and paste it here.",
@@ -184,6 +188,9 @@ const ar = {
     `🟢 <b>أنت من أوائل المدعوّين.</b>\n\nالمسابقة انطلقت، وأصحاب القائمة المبكرة تصلهم الدعوة قبل أي أحد. اضغط أدناه، انضم إلى الحملة على OKX، تأكّد أن حالتك تظهر "Enrolled"، وابدأ الصعود.\n\nيبقى التسجيل مفتوحًا حتى <b>الأربعاء 4 نوفمبر</b>. أثبت أنك الأفضل.\n\n💬 لديك أسئلة أو تريد التواصل مع متداولين آخرين؟ انضم إلى مجتمعنا: https://t.me/+SjuepdPTMUd5-BrQ\n\n` +
     `<i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
   regIssue: `⚠️ <b>ما قدرت تنضمّ للمسابقة بعد؟</b>\n\nمش لحالك. كتير منكم عم تظهرلهم رسالة <i>"You don't meet the requirements to join this campaign"</i> على OKX. عم نشتغل عليها مع فريق OKX هلّق، وما فاتك شي.\n\nحتى نفوّتك بأسرع وقت، <b>ابعتلنا الـ UID تبعك على OKX</b>: اضغط الزر تحت وحطّه.\n\n<i>بتلاقيه بتطبيق OKX: اضغط على صورة البروفايل (فوق عالشمال). الـ UID تحت اسمك، اضغط عليه لتنسخه.</i>\n\nرح نراسلك هون أول ما تنحلّ.`,
+  openRebind: (link) => `<b>كان عندك حساب OKX قبل PNL League؟</b> اربطه فينا أولًا، وبعدين انضمّ:
+${link}`,
+  regFixed: (camp, rebind) => `✅ <b>انحلّت مشكلة التسجيل. فيك تنضمّ هلّق.</b>\n\nافتح المسابقة، اضغط <b>Join</b> وتأكّد إنها مكتوب <b>"Enrolled"</b>:\n${camp.replace(/&/g, "&amp;")}\n\n<b>بعدك مش قادر؟</b> السبب واحد من اتنين:\n\n<b>1. KYC المستوى 2.</b> حسابك على OKX لازم يكون موثّق المستوى 2. بتطبيق OKX: اضغط على صورة البروفايل، بعدين Verification، وكمّل المستوى 2. بعدها جرّب مرة تانية.\n\n<b>2. خطوة الربط (rebind).</b> إذا كان عندك حساب OKX قبل PNL League، اربطه فينا أولًا:\n${rebind.replace(/&/g, "&amp;")}\nاعمل Submit، استنّى الموافقة، وبعدين انضمّ.\n\nبعدك عالق؟ ابعت /uid مع الـ UID تبعك ومنشيّكلك عليه.\n\n<i>‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر.</i>`,
   bSendUid: "ابعت الـ UID تبعي",
   askUid: "حطّ الـ UID تبعك على OKX هون (أرقام بس).",
   badUid: "هيدا ما بيشبه UID على OKX. هو رقم (عادةً من 8 لـ 20 رقم). انسخه من البروفايل على OKX وحطّه هون.",
