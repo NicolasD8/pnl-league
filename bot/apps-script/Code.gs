@@ -182,7 +182,27 @@ function lead_(l) {
   if (name.length < 2 || !/^\+?[0-9]{7,15}$/.test(phone) || ["has", "new"].indexOf(l.okx) < 0) return { saved: false };
   const ref = /^[a-z0-9_-]{0,40}$/.test(String(l.ref || "")) ? String(l.ref || "") : "";
   sheet_(LEADS, LCOLS).appendRow([new Date(), name, "'" + phone, l.okx, ref || "(direct)", l.lang === "ar" ? "ar" : "en", String(l.os || "")]);
+  if (!SpreadsheetApp.getActiveSpreadsheet().getSheetByName(OKX_ADS)) okxAdsTab();
   return { saved: true };
+}
+
+// "OKX Ads" tab: live formulas over Clicks + Leads, one row per ad tag (/okx/<tag>). Rebuilt by running okxAdsTab.
+const OKX_ADS = "OKX Ads";
+function okxAdsTab() {
+  sheet_(CLICKS, CCOLS); sheet_(LEADS, LCOLS); // the formulas need both tabs to exist
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = ss.getSheetByName(OKX_ADS) || ss.insertSheet(OKX_ADS);
+  sh.clear();
+  sh.getRange("A1").setValue("OKX landing page · per ad link (updates live)").setFontWeight("bold").setFontSize(13);
+  sh.getRange("A2").setValue("lp_view = page opened · lp_has / lp_new = button tapped · lp_submit = form completed · lp_rebind / lp_signup = OKX link tapped · lp_comp = competition tapped");
+  sh.getRange("A4").setFormula('=IFERROR(QUERY(Clicks!A2:E,"select B, sum(E) where C starts with \'lp_\' group by B pivot C label B \'Ad tag\'",0),"No visits yet")');
+  sh.getRange("M3").setValue("Leads per ad").setFontWeight("bold");
+  sh.getRange("M4").setFormula('=IFERROR(QUERY(Leads!A2:G,"select E, count(B) where B is not null group by E pivot D label E \'Ad tag\'",0),"No leads yet")');
+  sh.getRange("R3").setValue("Form entries (newest first)").setFontWeight("bold");
+  sh.getRange("R4:X4").setValues([["Time", "Name", "Phone", "OKX", "Ad tag", "Lang", "Device"]]).setFontWeight("bold");
+  sh.getRange("R5").setFormula('=IFERROR(SORT(FILTER(Leads!A2:G,Leads!B2:B<>""),1,FALSE),"")');
+  sh.getRange("R5:R").setNumberFormat("yyyy-mm-dd hh:mm");
+  sh.setFrozenRows(4);
 }
 
 function clickTotals_() {
@@ -373,7 +393,7 @@ function setup() {
 }
 
 function onOpen() {
-  SpreadsheetApp.getUi().createMenu("PNL Bot").addItem("Show stats", "menuStats_").addItem("Resume a stuck broadcast", "processBroadcasts").addToUi();
+  SpreadsheetApp.getUi().createMenu("PNL Bot").addItem("Show stats", "menuStats_").addItem("Build OKX Ads tab", "okxAdsTab").addItem("Resume a stuck broadcast", "processBroadcasts").addToUi();
 }
 function menuStats_() {
   const s = stats_();

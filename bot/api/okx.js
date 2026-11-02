@@ -25,9 +25,10 @@ const T = {
     back: "Back", errName: "Please enter your name.", errPhone: "Please enter a valid phone number.",
     hasH: "Link your account to PNL League", hasP: "Open the link on your phone, log in, and on \"Join this community\" write PNL League and tap Submit.",
     hasBtn: "Link my OKX account",
-    newH: "Create your OKX account", newP: "Sign up with our link, then finish identity verification (KYC Level 2): profile picture > Verification.",
+    newH: "Create your OKX account", newP: "Sign up with our link so your account counts for PNL League.",
     newBtn: "Sign up on OKX",
-    compH: "Then join the competition", compBtn: "Join the competition",
+    kycH: "Finish KYC Level 2", kycP: "In the OKX app: profile picture > Verification. Complete Level 2 (ID + face check). You can't join the competition without it.",
+    compH: "Join the competition", compBtn: "Join the competition",
     compHas: "Once your rebind is approved (up to 1 business day), open the competition, tap \"Join Campaign\" and check it says \"Enrolled\".",
     compNew: "Once your KYC is verified, open the competition, tap \"Join Campaign\" and check it says \"Enrolled\".",
     foot: "18+. KYC required. Trading involves risk. PNL League by CE · Presented by OKX",
@@ -41,9 +42,10 @@ const T = {
     back: "رجوع", errName: "يرجى إدخال اسمك.", errPhone: "يرجى إدخال رقم هاتف صحيح.",
     hasH: "اربط حسابك بـ PNL League", hasP: "افتح الرابط على هاتفك، سجّل الدخول، وفي خانة \"Join this community\" اكتب PNL League واضغط Submit.",
     hasBtn: "اربط حسابي على OKX",
-    newH: "أنشئ حسابك على OKX", newP: "سجّل عبر رابطنا، ثم أكمل التحقق من الهوية (KYC المستوى 2): صورة الملف > Verification.",
+    newH: "أنشئ حسابك على OKX", newP: "سجّل عبر رابطنا ليُحتسب حسابك ضمن PNL League.",
     newBtn: "سجّل على OKX",
-    compH: "ثم انضم إلى المسابقة", compBtn: "انضم إلى المسابقة",
+    kycH: "أكمل KYC المستوى 2", kycP: "في تطبيق OKX: صورة الملف > Verification. أكمل المستوى 2 (الهوية + التحقق من الوجه). لا يمكنك دخول المسابقة بدونه.",
+    compH: "انضم إلى المسابقة", compBtn: "انضم إلى المسابقة",
     compHas: "بعد الموافقة على الربط (خلال يوم عمل واحد)، افتح المسابقة، اضغط \"Join Campaign\" وتأكد أنها تقول \"Enrolled\".",
     compNew: "بعد التحقق من هويتك (KYC)، افتح المسابقة، اضغط \"Join Campaign\" وتأكد أنها تقول \"Enrolled\".",
     foot: "‏18+. التحقق من الهوية (KYC) مطلوب. التداول ينطوي على مخاطر. PNL League by CE · Presented by OKX",
@@ -83,7 +85,8 @@ module.exports = async (req, res, sheetImpl) => {
   const os = /android/i.test(ua) ? "android" : /iphone|ipad|ipod/i.test(ua) ? "ios" : "desktop";
   const signup = e.OKX_SIGNUP_URL || SIGNUP, rebind = e.OKX_REBIND_URL || REBIND;
   const comp = /^https:\/\//.test(e.OKX_CAMPAIGN_URL || "") ? e.OKX_CAMPAIGN_URL : CAMPAIGN;
-  const pixel = /^\d{6,20}$/.test(e.META_PIXEL_ID || "") ? e.META_PIXEL_ID : "";
+  const pixelId = e.OKX_PIXEL_ID || e.META_PIXEL_ID || ""; // OKX_PIXEL_ID lets this page use its own pixel
+  const pixel = /^\d{6,20}$/.test(pixelId) ? pixelId : "";
   const arrow = `<span aria-hidden="true">${L.dir === "rtl" ? "←" : "→"}</span>`;
 
   const html = `<!doctype html>
@@ -161,8 +164,13 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
       <p id="okxP"></p>
       <a class="btn" id="okx" href="#">${arrow}</a>
     </div>
-    <div class="card">
+    <div class="card" id="kyc">
       <div class="n">02</div>
+      <h2>${esc(L.kycH)}</h2>
+      <p>${esc(L.kycP)}</p>
+    </div>
+    <div class="card">
+      <div class="n" id="compN">03</div>
       <h2>${esc(L.compH)}</h2>
       <p id="compP"></p>
       <a class="btn alt" id="comp" href="${esc(comp)}">${esc(L.compBtn)} ${arrow}</a>
@@ -181,7 +189,8 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
     try{ fetch("/api/track",{method:"POST",body:body,keepalive:true,headers:{"content-type":"text/plain"}}); }catch(e){}
   }
   function show(id){ ["s1","s2","s3"].forEach(function(s){ $(s).hidden=s!==id; }); window.scrollTo(0,0); }
-  function pick(k){ okx=k; track(k==="has"?"lp_has":"lp_new"); show("s2"); $("name").focus(); }
+  function px(ev,custom){ ${pixel ? 'try{ fbq(custom?"trackCustom":"track",ev,{content_name:okx||"",ad:ref}); }catch(e){}' : ""} }
+  function pick(k){ okx=k; track(k==="has"?"lp_has":"lp_new"); px(k==="has"?"ChoseHasOKX":"ChoseNoOKX",1); show("s2"); $("name").focus(); }
   track("lp_view");
   $("has").addEventListener("click",function(){ pick("has"); });
   $("new").addEventListener("click",function(){ pick("new"); });
@@ -196,14 +205,15 @@ ${pixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n
     var lead=JSON.stringify({name:name,phone:phone,okx:okx,ref:ref,lang:lang}), queued=false;
     try{ queued=navigator.sendBeacon&&navigator.sendBeacon("/api/okx",new Blob([lead],{type:"text/plain"})); }catch(e){}
     if(!queued){ try{ fetch("/api/okx",{method:"POST",body:lead,keepalive:true,headers:{"content-type":"text/plain"}}); }catch(e){} }
-    track("lp_submit"); ${pixel ? 'try{fbq("track","Lead",{content_name:okx})}catch(e){}' : ""}
+    track("lp_submit"); px("Lead");
     var t=TX[okx];
     $("okxH").textContent=t[0]; $("okxP").textContent=t[1]; $("compP").textContent=t[4]; $("okx").href=t[3];
+    $("kyc").hidden=okx==="has"; $("compN").textContent=okx==="has"?"02":"03";
     $("okx").insertBefore(document.createTextNode(t[2]+" "),$("okx").firstChild);
     show("s3");
   });
-  $("okx").addEventListener("click",function(){ track(okx==="has"?"lp_rebind":"lp_signup"); });
-  $("comp").addEventListener("click",function(){ track("lp_comp"); });
+  $("okx").addEventListener("click",function(){ track(okx==="has"?"lp_rebind":"lp_signup"); px(okx==="has"?"OpenRebind":"OpenOKXSignup",1); });
+  $("comp").addEventListener("click",function(){ track("lp_comp"); px("OpenCompetition",1); });
 })();
 </script>
 </body>

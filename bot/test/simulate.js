@@ -269,6 +269,11 @@ const log = (label) => console.log("✓", label);
   assert.match(lp.body, /rebindCode=TGQ27Z5X/); assert.match(lp.body, /okx\.com\/join\/8754277/); assert.match(lp.body, /var ref="lead1_c1"/);
   assert.match(lp.body, /id="comp" href="https:\/\/www\.okx\.com\/campaigns\/ce-community-trading-competition-phase-1/, "step 2 is the competition link");
   assert.match(lp.body, /Once your rebind is approved/); assert.match(lp.body, /Once your KYC is verified/);
+  assert.match(lp.body, /id="kyc"[\s\S]*Finish KYC Level 2/, "no-account path has a KYC step"); assert.ok(!/fbq\(/.test(lp.body), "no pixel without an id");
+  process.env.OKX_PIXEL_ID = "123456789012";
+  const px = (await call({ method: "GET", query: { ref: "a1" } })).body;
+  assert.match(px, /fbq\("init","123456789012"\)/); assert.match(px, /ChoseNoOKX/); assert.match(px, /"Lead"/); assert.match(px, /OpenCompetition/);
+  delete process.env.OKX_PIXEL_ID;
   assert.match((await call({ method: "GET", query: { lang: "ar" } })).body, /dir="rtl"/);
   const leads = [], fakeSheet = { lead: async (l) => { leads.push(l); } };
   const ok = await call({ method: "POST", body: JSON.stringify({ name: "Test User", phone: "+961 70-123 456", okx: "has", ref: "lead1_c1", lang: "en" }) }, fakeSheet);
@@ -278,7 +283,7 @@ const log = (label) => console.log("✓", label);
   assert.equal(leads.length, 1, "bad leads are not saved");
   const down = await call({ method: "POST", body: { name: "Test", phone: "70123456", okx: "new" } }, { lead: async () => { throw new Error("sheet down"); } });
   assert.equal(down.code, 200, "a Sheet outage still lets them continue to OKX");
-  log("/okx landing page: two buttons, rebind vs sign-up links, competition link as step 2, Arabic, lead saved, bad input rejected");
+  log("/okx landing page: two buttons, rebind vs sign-up links, KYC step, competition step, pixel events, Arabic, lead saved, bad input rejected");
 
   // /stats shows the ad funnel once the page has traffic
   const realStats = db.stats; db.stats = async () => ({ ...(await realStats()), clicks: { lead3: { view: 120, tap_open: 45, tap_get_telegram: 9 } }, opened_by_ref: { lead3: 30 }, by_ref: { lead3: 12 } });
