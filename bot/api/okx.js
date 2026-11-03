@@ -80,7 +80,7 @@ async function saveLead(req, res, e, sheetImpl, tgImpl) {
 function waNumber(phone) {
   let d = phone.replace(/^\+/, "").replace(/^00/, "");
   if (!phone.startsWith("+") && !phone.startsWith("00") && d.length <= 8) d = "961" + d.replace(/^0/, "");
-  return d;
+  return d.replace(/^9610/, "961"); // "+961 03 ..." typed with the local 0
 }
 function leadAlert({ name, phone, okx, ref, lang, os }) {
   const time = new Date().toLocaleString("en-GB", { timeZone: "Asia/Beirut", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
